@@ -4,10 +4,17 @@
 \alias{BrainMapManhattanPlot}
 \title{Manhattan plot of a brain association map}
 \usage{
-BrainMapManhattanPlot(path, bwasFile, yMax, phenotypeLabel, signifThreshold)
+BrainMapManhattanPlot(
+  inputPath,
+  bwasFile,
+  yMax,
+  phenotypeLabel,
+  signifThreshold,
+  outputPath
+)
 }
 \arguments{
-\item{path}{path (folder) to the raw brain association maps (outputs of OSCA)}
+\item{inputPath}{path (folder) to the raw brain association maps (outputs of OSCA)}
 
 \item{bwasFile}{name of the brain association map}
 
@@ -16,6 +23,8 @@ BrainMapManhattanPlot(path, bwasFile, yMax, phenotypeLabel, signifThreshold)
 \item{phenotypeLabel}{Label of the phenotype - for plotting}
 
 \item{signifThreshold}{significance threshold}
+
+\item{outputPath}{path where the outputs will be written}
 }
 \value{
 Manhattan plot as well as formatted brain association map (full and subsetted for significant vertices)

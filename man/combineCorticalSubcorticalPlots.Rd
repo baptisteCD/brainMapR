@@ -4,14 +4,21 @@
 \alias{combineCorticalSubcorticalPlots}
 \title{Combine cortical and subcortical figures to create a multi-panel plot}
 \usage{
-combineCorticalSubcorticalPlots(path, bwasFile, pathToLegendBar)
+combineCorticalSubcorticalPlots(
+  inputPath,
+  bwasFile,
+  pathToLegendBar,
+  outputPath
+)
 }
 \arguments{
-\item{path}{path to working directory (input and output folder)}
+\item{inputPath}{path (folder) to the cortical and subcortical plots}
 
 \item{bwasFile}{Variable name (used to name the clustersAndCoordinates file)}
 
 \item{pathToLegendBar}{Path to the manually created legend bar}
+
+\item{outputPath}{path where the outputs will be written}
 }
 \value{
 Outside and Inside snapshots of the surfaces.

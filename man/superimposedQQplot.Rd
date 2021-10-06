@@ -4,10 +4,17 @@
 \alias{superimposedQQplot}
 \title{QQplot of several brain association maps}
 \usage{
-superimposedQQplot(path, scenarioList, legendList, colourList, variableLabel)
+superimposedQQplot(
+  inputPath,
+  scenarioList,
+  legendList,
+  colourList,
+  variableLabel,
+  outputPath
+)
 }
 \arguments{
-\item{path}{path to working directory}
+\item{inputPath}{path to working directory containing the outputs of BrainMapManhattanPlot()}
 
 \item{scenarioList}{List of scenarios/folders each containing a brain association map}
 
@@ -16,6 +23,8 @@ superimposedQQplot(path, scenarioList, legendList, colourList, variableLabel)
 \item{colourList}{List of colours for the different scenarios/folders}
 
 \item{variableLabel}{label of the variable}
+
+\item{outputPath}{path where the outputs will be written}
 }
 \value{
 QQplot with several distributions

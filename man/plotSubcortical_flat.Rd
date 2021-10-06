@@ -4,17 +4,19 @@
 \alias{plotSubcortical_flat}
 \title{Better rendition of the subcortical brain plots}
 \usage{
-plotSubcortical_flat(path, bwasFile, pathPhenotypeFile)
+plotSubcortical_flat(inputPath, bwasFile, pathPhenotypeFile, outputPath)
 }
 \arguments{
-\item{path}{path to working directory (input and output folder)}
+\item{inputPath}{path (folder) to the brain association maps (outputs of identifyClustersBWAS())}
 
 \item{bwasFile}{name of the brain association map (without extension)}
 
 \item{pathPhenotypeFile}{Path to the variable files (e.g. variable.phen) used get variance of the phenotype}
+
+\item{outputPath}{path where the outputs will be written}
 }
 \value{
-Outside and Inside snapshots of the surfaces - the subcortical structures are spread out to faciliate viewing.
+Outside and Inside snapshots of the surfaces.
 }
 \description{
 This function reads in an annotated brain association map (cluster and coordinates).
