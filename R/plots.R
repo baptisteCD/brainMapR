@@ -169,7 +169,7 @@ qqplot(bwas$p, col=colourList[1])
 legend(x = 3.5, y = 0.75*max(bwas$log10p), legend = legendList ,pch=20, pt.cex=1.5,  col = colourList)
 
  for (scenario in scenarioList[-1] ){
-bwas=read_csv(paste0(path, scenarioList[jjj], "/BWAS_fullSummary_", variableLabel, ".csv"))
+bwas=read_csv(paste0(inputPath, scenarioList[jjj], "/BWAS_fullSummary_", variableLabel, ".csv"))
 qqplot(bwas$p, col=colourList[jjj], add=T)
  print(print(round(median(bwas$CHI2,na.rm=T)/qchisq(0.5,df=1),3)))
 jjj=jjj+1
