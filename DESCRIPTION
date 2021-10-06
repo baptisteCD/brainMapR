@@ -1,0 +1,28 @@
+Package: brainMapR
+Title: Analyse and plot brain association maps
+Version: 0.8.0.9000
+Authors@R: 
+    person(given = "Baptiste",
+           family = "Couvy-Duchesne",
+           role = c("aut", "cre"),
+           email = "baptiste.couvyduchesne@gmail.com",
+           comment = c(ORCID = "Y0000-0002-0719-9302"))
+Description: This package originated from the publication "A parsimonious model for mass-univariate vertex-wise analysis" (Baptiste Couvy-Duchesne, Futao Zhang, Kathryn E. Kemper, Julia Sidorenko, Naomi R. Wray, Peter M. Visscher, Olivier Colliot, Jian Yang). The functions help you open, format, analyse and plot the results from mass-univariate association testing in the cortex and subcortical volumes. We expect the analyses to have been run with OSCA (https://cnsgenomics.com/software/osca/#Overview) for fsaverage cortical maps and ENIGMA-shape subcortical maps.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.2
+Depends:
+    plyr,
+    png,
+    qqman,
+    readr,
+    Rvcg,
+    rgl,
+    RColorBrewer,
+    grid,
+    gridExtra,
+    viridis,
+    Morpho,
+    ggplot2
