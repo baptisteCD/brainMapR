@@ -1,4 +1,4 @@
-atlasPath="/Users/uqbcouvy/Documents/MyDocuments/56_BWAS/brainMapR/brainMapR/inst/extdata/atlas/"
+atlasPath="https://github.com/baptisteCD/brainMapR/tree/main/inst/extdata/atlas"
 
 
 #' Open and format association brain map (Cortical)
