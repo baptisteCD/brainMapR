@@ -1,5 +1,3 @@
-atlasPath="https://github.com/baptisteCD/brainMapR/tree/main/inst/extdata/atlas"
-
 
 #' Open and format association brain map (Cortical)
 #'
@@ -16,7 +14,7 @@ atlasPath="https://github.com/baptisteCD/brainMapR/tree/main/inst/extdata/atlas"
 formatBWAScortical<-function(BWASsumstat, hemi, mod){
 BWASsumstat$ProbeID<-BWASsumstat$Probe
 
-atlas<-read.table(paste0(atlasPath, "fsaverage_vertex_labels_names_order2.txt"), header=T, stringsAsFactors = F)
+atlas<-read.table(system.file("extdata/atlas", "fsaverage_vertex_labels_names_order2.txt", package = "brainMapR",mustWork = TRUE), header=T, stringsAsFactors = F)
 # adapt probe prefix to modality and hemisphere
 if (hemi=="lh" & mod=="thickness"){ prefix="lht"}
 if (hemi=="lh" & mod=="area"){ prefix="lha" }
@@ -65,7 +63,7 @@ formatBWASsubcortical<-function(BWASsumstat){
 
 BWASsumstat$ProbeID<-gsub(".*[a-z][_]", "", BWASsumstat$Probe)
 
-atlas<-read.table(paste0(atlasPath, "fsaverage_subcortical_vertices_label.txt"), header=T, stringsAsFactors = F)
+atlas<-read.table(system.file("extdata/atlas", "fsaverage_subcortical_vertices_label.txt", package = "brainMapR",mustWork = TRUE), header=T, stringsAsFactors = F)
 BWASsumstat<-merge(BWASsumstat, atlas, by="ProbeID" )
 
 BWASsumstat<-BWASsumstat[order(BWASsumstat$subcv),]
@@ -92,7 +90,7 @@ return(BWASsumstat)
 #' @export
 bwasAddCoordinatesCortical=function(bwasFormatted, hemi, moda){
 # Get vertices coordinates
-coor=read.table(paste0(atlasPath, hemi, ".vertexCoordinates.asc"))
+coor=read.table(paste0(system.file("extdata/atlas", "", package = "brainMapR",mustWork = TRUE), hemi, ".vertexCoordinates.asc"))
 coor$V1=paste0(hemi, substr(moda, 1,1), "_", coor$V1)
 colnames(coor)=c("ProbeID", "X", "Y", "Z", "V4")
 # Add coordinates
@@ -117,7 +115,7 @@ return(bwasFormatted)
 #' @export
 bwasAddCoordinatesSubcortical=function(bwasFormatted, hemi, moda){
 # Get vertices coordinates
-coor=read.table(paste0(atlasPath, "Atlas_coordinates_subortical.txt"), stringsAsFactors = F, header=T)
+coor=read.table(system.file("extdata/atlas", "Atlas_coordinates_subortical.txt", package = "brainMapR",mustWork = TRUE), stringsAsFactors = F, header=T)
 # Add coordinates
 bwasFormatted=merge(bwasFormatted, coor, by="ProbeID")
 return(bwasFormatted)
