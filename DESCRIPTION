@@ -1,6 +1,6 @@
 Package: brainMapR
 Title: Analyse and plot brain association maps
-Version: 0.8.1
+Version: 0.9.1
 Authors@R: 
     person(given = "Baptiste",
            family = "Couvy-Duchesne",

@@ -245,6 +245,7 @@ rgl.close()
 #' @return Outside and Inside snapshots of the surfaces.
 #' @param outputPath path where the outputs will be written
 #' @import plyr png qqman readr Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices
+#' @export
 plotSubcortical_flat=function(inputPath, bwasFile, pathPhenotypeFile, outputPath){
 
   for (moda in c("thick", "LogJacs")){
