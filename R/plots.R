@@ -38,7 +38,7 @@ expectedP <- -log10(ppoints(length(pvector)))
 #' @param phenotypeLabel Label of the phenotype - for plotting
 #' @param signifThreshold significance threshold
 #' @param outputPath path where the outputs will be written
-#' @param qqplot True/False: should a qqplot also be created?
+#' @param qqPlot True/False: should a qqplot also be created?
 #' @return Manhattan plot as well as formatted brain association map (full and subsetted for significant vertices)
 #' @import plyr png qqman readr Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices
 #' @export
@@ -143,7 +143,7 @@ write.csv(BWASsignif, paste0(outputPath, "/BWAS_fullSummary_", bwasFile, ".csv" 
 write.csv(BWASsignif[which(BWASsignif$log10p > signifLog10),], paste0(outputPath, "/BWAS_signif_", bwasFile , ".csv" ))
 
 if (qqPlot==T){
-    png(paste0(outputPath, "QQplor_", bwasFile, ".png"), width = 10, height = 10, units = "cm", res = 400, type="cairo")
+    png(paste0(outputPath, "QQplot_", bwasFile, ".png"), width = 10, height = 10, units = "cm", res = 400, type="cairo")
     qqplot(pvector = BWASsumstat$p )
     dev.off()
 }

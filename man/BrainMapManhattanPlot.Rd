@@ -27,7 +27,7 @@ BrainMapManhattanPlot(
 
 \item{outputPath}{path where the outputs will be written}
 
-\item{qqplot}{True/False: should a qqplot also be created?}
+\item{qqPlot}{True/False: should a qqplot also be created?}
 }
 \value{
 Manhattan plot as well as formatted brain association map (full and subsetted for significant vertices)
