@@ -1,3 +1,32 @@
+#' QQplot of an association map (or any vector of pvalues)
+#'
+#' This function takes in a vector of pvalues and creates a qqplot (in console)
+#'
+#'
+#' @param pvector Vector of pvalues
+#' @param col colour of plot
+#' @param add Add to existing plot (T/F)
+#' @param ylim limit of y axis
+#' @return QQplot
+#' @import plyr png qqman readr Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices
+#' @export
+qqplot <- function(pvector, col = "black", add = F, ylim = NULL){
+expectedP <- -log10(ppoints(length(pvector)))
+  observedP <- -log10(sort(pvector, decreasing = F))
+  if (add == F) {
+    plot(x = expectedP, y = observedP, col = col,
+         xlab = expression(Expected ~ ~-log[10](italic(p))),
+         ylab = expression(Observed ~ ~-log[10](italic(p))),
+         pch = 16, cex = 0.7, ylim = NULL)
+    abline(0, 1, col = "red")
+  }else{
+    points(x = expectedP, y = observedP, col = col,
+           xlab = expression(Expected ~ ~-log[10](italic(p))),
+           ylab = expression(Observed ~ ~-log[10](italic(p))),
+           pch = 16, cex = 0.7, ylim = NULL)
+  }
+}
+
 #' Manhattan plot of a brain association map
 #'
 #' This function takes in raw brain association maps, formats it and writes plot
@@ -9,10 +38,11 @@
 #' @param phenotypeLabel Label of the phenotype - for plotting
 #' @param signifThreshold significance threshold
 #' @param outputPath path where the outputs will be written
+#' @param qqplot True/False: should a qqplot also be created?
 #' @return Manhattan plot as well as formatted brain association map (full and subsetted for significant vertices)
 #' @import plyr png qqman readr Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices
 #' @export
-BrainMapManhattanPlot<-function(inputPath , bwasFile , yMax, phenotypeLabel, signifThreshold, outputPath){
+BrainMapManhattanPlot<-function(inputPath , bwasFile , yMax, phenotypeLabel, signifThreshold, outputPath, qqPlot){
 
 BWASsignif=NULL
 chi2All=NULL
@@ -112,38 +142,13 @@ dev.off()
 write.csv(BWASsignif, paste0(outputPath, "/BWAS_fullSummary_", bwasFile, ".csv" ))
 write.csv(BWASsignif[which(BWASsignif$log10p > signifLog10),], paste0(outputPath, "/BWAS_signif_", bwasFile , ".csv" ))
 
+if (qqPlot==T){
+    png(paste0(outputPath, "QQplor_", bwasFile, ".png"), width = 10, height = 10, units = "cm", res = 400, type="cairo")
+    qqplot(pvector = BWASsumstat$p )
+    dev.off()
 }
 
-
-#' QQplot of an association map (or any vector of pvalues)
-#'
-#' This function takes in a vector of pvalues and creates a qqplot (in console)
-#'
-#'
-#' @param pvector Vector of pvalues
-#' @param col colour of plot
-#' @param add Add to existing plot (T/F)
-#' @param ylim limit of y axis
-#' @return QQplot
-#' @import plyr png qqman readr Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices
-#' @export
-qqplot <- function(pvector, col = "black", add = F, ylim = NULL){
-expectedP <- -log10(ppoints(length(pvector)))
-  observedP <- -log10(sort(pvector, decreasing = F))
-  if (add == F) {
-    plot(x = expectedP, y = observedP, col = col,
-         xlab = expression(Expected ~ ~-log[10](italic(p))),
-         ylab = expression(Observed ~ ~-log[10](italic(p))),
-         pch = 16, cex = 0.7, ylim = NULL)
-    abline(0, 1, col = "red")
-  }else{
-    points(x = expectedP, y = observedP, col = col,
-           xlab = expression(Expected ~ ~-log[10](italic(p))),
-           ylab = expression(Observed ~ ~-log[10](italic(p))),
-           pch = 16, cex = 0.7, ylim = NULL)
-  }
 }
-
 
 #' QQplot of several brain association maps
 #'
