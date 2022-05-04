@@ -21,7 +21,7 @@ lambda=NULL
 signifLog10= -log( signifThreshold, base=10 )
 
 # Initialise plot
-png(paste0(inputPath, "Manhathan_", bwasFile, "_simple.png"), width = 50, height = 16, units = "cm", res = 400, type="cairo")
+png(paste0(outputPath, "Manhathan_", bwasFile, "_simple.png"), width = 50, height = 16, units = "cm", res = 400, type="cairo")
 plot.new()
 layout(matrix(c(1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,6,7,8), nrow =1 , ncol = 20, byrow = F))
 
