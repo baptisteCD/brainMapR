@@ -9,12 +9,12 @@
 #' @param hemi Hemisphere ("lh" or "rh")
 #' @param mod modality ("area" or "thickness")
 #' @return An enriched brain association maps which contains more vertex information, including corresponding grey-matter region, 3D coordinates, and ad hoc information for plotting.
-#' @import plyr png qqman readr Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices vroom
+#' @import plyr png qqman Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices vroom
 #' @export
 formatBWAScortical<-function(BWASsumstat, hemi, mod){
 
 # Open atlas with details about FreeSurfer fsaverage vertices
-atlas<-vroom(system.file("extdata/atlas", "Atlas_coordinates_corticalVertices.txt", package = "brainMapR",mustWork = TRUE))
+atlas<-vroom(system.file("extdata/atlas", "Atlas_coordinates_corticalVertices.txt", package = "brainMapR",mustWork = TRUE), show_col_types = FALSE)
 
 # Merge atlas and summary statistics
 BWASsumstat<-merge(BWASsumstat, atlas, by.x="Probe", by.y="vertexID" )
@@ -40,18 +40,18 @@ return(BWASsumstat)
 #' @param hemi Hemisphere ("lh" or "rh")
 #' @param mod modality ("LogJacs" or "thick")
 #' @return An enriched brain association maps which contains more vertex information
-#' @import plyr png qqman readr Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices vroom
+#' @import plyr png qqman Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices vroom
 #' @export
 formatBWASsubcortical<-function(BWASsumstat, hemi, mod){
 
 # Open atlas with vertex information
-atlas<-vroom(system.file("extdata/atlas", "Atlas_coordinates_ROI_subortical.txt", package = "brainMapR",mustWork = TRUE))
+atlas<-vroom(system.file("extdata/atlas", "Atlas_coordinates_ROI_subortical.txt", package = "brainMapR",mustWork = TRUE), show_col_types = FALSE)
 
 # Merge with summary statistics
 BWASsumstat<-merge(BWASsumstat, atlas, by.x="Probe", by.y="ProbeID" )
 
 # Order by ROI and create xax which will serve as the x axis in Manhattan plot.
-BWASsumstat<-BWASsumstat[which(BWASsumstat$hemi == hemi & BWASsumstat$moda==mod),]
+BWASsumstat<-BWASsumstat[which(BWASsumstat$hemi==hemi & BWASsumstat$moda==mod),]
 BWASsumstat<-BWASsumstat[order(BWASsumstat$ROINb),]
 BWASsumstat$xax<-1:length(BWASsumstat[,1])
 

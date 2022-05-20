@@ -4,15 +4,10 @@
 \alias{identifyClustersBWAS}
 \title{Run all the cluster identification from a raw brain map}
 \usage{
-identifyClustersBWAS(
-  pathToTheBWASresults,
-  bwasFile,
-  outputFolder,
-  signifThreshold
-)
+identifyClustersBWAS(inputPath, bwasFile, outputFolder, signifThreshold)
 }
 \arguments{
-\item{pathToTheBWASresults}{path (folder) to the raw brain association maps (outputs of OSCA)}
+\item{inputPath}{path (folder) to the raw brain association maps (outputs of OSCA)}
 
 \item{bwasFile}{name of the brain association map (without extension)}
 

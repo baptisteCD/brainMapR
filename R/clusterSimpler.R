@@ -9,7 +9,7 @@
 #' @param targetVertex Name of the vertex of interest
 #' @param nbNearestNeighbours Number of nearest neighbors to add to the cluster at each iterative step
 #' @return An updated brain association map with cluster membership
-#' @import plyr png qqman readr Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices
+#' @import plyr png qqman Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices
 #' @export
 significantClusterAroundVertex=function(bwas, signifThreshold, targetVertex, nbNearestNeighbours ){
 
@@ -65,7 +65,7 @@ return(bwas)
 #' @param KNearestNeighbours Number of nearest neighbors to add to the cluster at each iterative step
 #' @param phenotypeLabel Label of the phenotype for enhanced plotting
 #' @return Summary file of significant clusters and their properties
-#' @import plyr png qqman readr Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices
+#' @import plyr png qqman Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices
 #' @export
 clusterIdentification=function(path, bwas, moda, signifThreshold, KNearestNeighbours, phenotypeLabel){
 
@@ -91,7 +91,7 @@ if (moda %in% c("LogJacs", "thick")){ ROIlist=c(10, 11, 12, 13, 17, 18, 26, 49, 
   bwas1$inCluster=rowSums(bwas1[,grep(x = colnames(bwas1), pattern = "cluster_"), drop=FALSE])
 
     if (length(table(bwas1$inCluster))>2){
- print("WARNING: some vertices have been attributed to several clusters. You may want to check the results or you may want to modify the nearest neighbour search option k, in mcNNindex() (used in function significantClusterAroundVertex), in the meantime,  the 2 clusters are merged")
+ print("WARNING: some vertices have been attributed to several clusters. You may want to visually check the results. In the meantime, the 2 clusters are merged")
 
     # Merge clusters and resets variable
     TPvertex=bwas1$Probe[which(bwas1$inCluster==2 & bwas1$signifVoxel==1)][1]
@@ -130,42 +130,38 @@ if (moda %in% c("LogJacs", "thick")){ ROIlist=c(10, 11, 12, 13, 17, 18, 26, 49, 
 #' This function combines, reading and formatting fuctions as well as the clustering ones to perform all the analyses for you.
 #'
 #'
-#' @param pathToTheBWASresults path (folder) to the raw brain association maps (outputs of OSCA)
+#' @param inputPath path (folder) to the raw brain association maps (outputs of OSCA)
 #' @param bwasFile name of the brain association map (without extension)
 #' @param outputFolder path to output folder
 #' @param signifThreshold significance threshold
 #' @return Summary file of significant clusters and their properties
-#' @import plyr png qqman readr Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices
+#' @import plyr png qqman Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices vroom
 #' @export
-identifyClustersBWAS=function(pathToTheBWASresults, bwasFile, outputFolder, signifThreshold){
+identifyClustersBWAS=function(inputPath, bwasFile, outputFolder, signifThreshold){
 
-if (file.exists(paste0(pathToTheBWASresults, bwasFile, ".linear"))){
-bwasResult=read.table(paste0(pathToTheBWASresults, bwasFile, ".linear"), header=T, stringsAsFactors = F) } else if (file.exists(paste0(pathToTheBWASresults,  bwasFile, ".moa"))) {
-bwasResult=read.table(paste0(pathToTheBWASresults, bwasFile, ".moa"), header=T, stringsAsFactors = F)  } else {
-bwasResult=read.table(paste0(pathToTheBWASresults, bwasFile, ".moment"), header=T, stringsAsFactors = F)
-}
+# Open BWAS result
+bwasResult=vroom(paste0(inputPath, bwasFile), show_col_types = F)
 resTot=NULL
 
+# Loop on all modalities
 for (moda in c("area", "thickness", "thick", "LogJacs")){
 # Open and format bwas summary statistics
 if (moda %in% c("thick", "LogJacs")){
-bwasFormatted=formatBWASsubcortical(BWASsumstat = bwasResult)
-bwasFormatted=bwasFormatted[grep(bwasFormatted$Probe, pattern = moda),]
-bwas=bwasAddCoordinatesSubcortical(bwasFormatted = bwasFormatted)
+bwasFormattedlh=formatBWASsubcortical(BWASsumstat = bwasResult, hemi="lh", mod=moda)
+bwasFormattedrh=formatBWASsubcortical(BWASsumstat = bwasResult, hemi="rh", mod=moda)
+bwas=rbind(bwasFormattedlh, bwasFormattedrh)
 }
 
 if (moda %in% c("thickness", "area")){
 # Format left and right hemisphere data
 bwasFormattedlh=formatBWAScortical(BWASsumstat = bwasResult, hemi = "lh", mod = moda)
-bwaslh=bwasAddCoordinatesCortical(bwasFormatted = bwasFormattedlh , hemi = "lh", moda = moda)
 bwasFormattedrh=formatBWAScortical(BWASsumstat = bwasResult, hemi = "rh", mod = moda)
-bwasrh=bwasAddCoordinatesCortical(bwasFormatted = bwasFormattedrh , hemi = "rh", moda = moda)
 # Rbind left and right
-bwas=rbind(bwasrh, bwaslh)
+bwas=rbind(bwasFormattedlh, bwasFormattedrh)
 }
 
 # Run cluster statistic
-res=clusterIdentification(path=pathToTheBWASresults, bwas = bwas,  moda = moda, signifThreshold = signifThreshold, KNearestNeighbours = 10, phenotypeLabel = bwasFile)
+res=clusterIdentification(path=inputPath, bwas = bwas,  moda = moda, signifThreshold = signifThreshold, KNearestNeighbours = 10, phenotypeLabel = bwasFile)
 colnames(res)=paste0(colnames(res), "_", moda)
 resTot=c(resTot, res)
 }

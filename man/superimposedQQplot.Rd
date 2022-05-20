@@ -5,26 +5,26 @@
 \title{QQplot of several brain association maps}
 \usage{
 superimposedQQplot(
-  inputPath,
-  scenarioList,
+  inputPaths,
+  bwasFiles,
   legendList,
   colourList,
-  variableLabel,
+  phenotypeLabel,
   outputPath
 )
 }
 \arguments{
-\item{inputPath}{path to working directory containing the files BWAS_fullSummary_\link{...}.csv, created by BrainMapManhattanPlot()}
+\item{inputPaths}{paths to working directories containing the files BWAS_fullSummary_....csv, created by BrainMapManhattanPlot()}
 
-\item{scenarioList}{List of scenarios/folders each containing a brain association map}
+\item{bwasFiles}{list of brain association maps within each inputPath}
 
 \item{legendList}{List of labels for the different scenarios/folders}
 
 \item{colourList}{List of colours for the different scenarios/folders}
 
-\item{variableLabel}{label of the variable}
+\item{phenotypeLabel}{Label of the phenotype - used for plotting}
 
-\item{outputPath}{path where the outputs will be written}
+\item{outputPath}{path where the output will be written}
 }
 \value{
 QQplot with several distributions

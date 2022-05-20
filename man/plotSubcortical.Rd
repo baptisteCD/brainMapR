@@ -4,16 +4,24 @@
 \alias{plotSubcortical}
 \title{Subcortical brain plot}
 \usage{
-plotSubcortical(inputPath, bwasFile, pathPhenotypeFile, outputPath)
+plotSubcortical(
+  inputPath,
+  bwasFile,
+  variancePheno,
+  outputPath,
+  signifThreshold
+)
 }
 \arguments{
 \item{inputPath}{path (folder) to the raw brain association maps (outputs of identifyClustersBWAS())}
 
-\item{bwasFile}{name of the brain association map (without extension)}
+\item{bwasFile}{name of the brain association map}
 
-\item{pathPhenotypeFile}{Path to the variable files (e.g. variable.phen) used get variance of the phenotype}
+\item{variancePheno}{Variance of the phenotype (used to standardise the effect sizes into correlations)}
 
 \item{outputPath}{path where the outputs will be written}
+
+\item{signifThreshold}{pvalue significance threshold used to account for multiple testing}
 }
 \value{
 Outside and Inside snapshots of the surfaces.

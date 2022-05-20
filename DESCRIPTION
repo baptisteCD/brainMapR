@@ -17,7 +17,6 @@ Depends:
     plyr,
     png,
     qqman,
-    readr,
     Rvcg,
     rgl,
     RColorBrewer,

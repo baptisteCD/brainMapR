@@ -7,7 +7,7 @@
 #' @param col colour of points
 #' @param add Add to existing plot (T/F)
 #' @return QQplot
-#' @import plyr png qqman readr Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices
+#' @import plyr png qqman Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices
 #' @export
 qqplot <- function(pvector, col = "black", add = F){
 expectedP <- -log10(ppoints(length(pvector)))
@@ -39,7 +39,7 @@ expectedP <- -log10(ppoints(length(pvector)))
 #' @param outputPath path where the outputs will be written
 #' @param qqPlot True/False: should a qqplot also be created?
 #' @return Manhattan plot as well as annotated brain association maps (full and subset of significant vertices)
-#' @import plyr png qqman readr Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices vroom
+#' @import plyr png qqman Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices vroom
 #' @export
 BrainMapAnnotAndManhattanPlot<-function(inputPath , bwasFile , yMax, phenotypeLabel, signifThreshold, outputPath, qqPlot=T){
 
@@ -145,26 +145,33 @@ if (qqPlot==T){
 #' This function reads in a list of brain association maps, which have been formatted and created as part of the Manhattan plot creation (this allows inferring more easily the file names)
 #'
 #'
-#' @param inputPath path to working directory containing the files BWAS_fullSummary_[...].csv, created by BrainMapManhattanPlot()
-#' @param scenarioList List of scenarios/folders each containing a brain association map
-#' @param legendList List of labels for the different scenarios/folders
-#' @param variableLabel label of the variable
+#' @param inputPaths paths to working directories containing the files BWAS_fullSummary_....csv, created by BrainMapManhattanPlot()
+#' @param bwasFiles list of brain association maps within each inputPath
 #' @param colourList List of colours for the different scenarios/folders
-#' @param outputPath path where the outputs will be written
+#' @param legendList List of labels for the different scenarios/folders
+#' @param outputPath path where the output will be written
+#' @param phenotypeLabel Label of the phenotype - used for plotting
 #' @return QQplot with several distributions
 #' @export
-superimposedQQplot=function(inputPath , scenarioList,  legendList, colourList, variableLabel, outputPath){
+superimposedQQplot=function(inputPaths , bwasFiles, legendList, colourList, phenotypeLabel, outputPath){
 
-jjj=2
-png(paste0(outputPath, "QQplotCombined_assocVertices", variableLabel, ".png"), width = 15, height = 15, units = "cm", res=400)
+# Initialise plot with first scenario
+png(paste0(outputPath, "QQplotCombined_assocVertices", phenotypeLabel, ".png"), width = 15, height = 15, units = "cm", res=400)
 par(mar=c(4,4,2,1))
-bwas=read_csv(paste0(inputPath, scenarioList[1], "/BWAS_fullSummary_", variableLabel, ".csv"))
+if (file.exists(paste0(inputPaths[1], "/BWAS_fullSummary_", bwasFiles[1], ".csv"))){
+bwas=vroom(paste0(inputPaths[1], "/BWAS_fullSummary_", bwasFiles[1], ".csv"), show_col_types = F)} else {
+    print(paste0(inputPaths[1], "/BWAS_fullSummary_", bwasFiles[1], ".csv", "  not found, please check that the path is correct or that you have run BrainMapAnnotAndManhattanPlot() first"))
+}
 qqplot(bwas$p, col=colourList[1])
  print(round(median(bwas$CHI2,na.rm=T)/qchisq(0.5,df=1),3))
 legend(x = 3.5, y = 0.75*max(bwas$log10p), legend = legendList ,pch=20, pt.cex=1.5,  col = colourList)
 
- for (scenario in scenarioList[-1] ){
-bwas=read_csv(paste0(inputPath, scenarioList[jjj], "/BWAS_fullSummary_", variableLabel, ".csv"))
+jjj=2
+ for (scenario in legendList[-1] ){
+     if (file.exists(paste0(inputPaths[jjj], "/BWAS_fullSummary_", bwasFiles[jjj], ".csv"))) {
+bwas=vroom(paste0(inputPaths[jjj], "/BWAS_fullSummary_", bwasFiles[jjj], ".csv"), show_col_types = F) } else {
+ print(paste0(inputPaths[jjj], "/BWAS_fullSummary_", bwasFiles[jjj], ".csv", "  not found, please check that the path is correct or that you have run BrainMapAnnotAndManhattanPlot() first"))
+}
 qqplot(bwas$p, col=colourList[jjj], add=T)
  print(print(round(median(bwas$CHI2,na.rm=T)/qchisq(0.5,df=1),3)))
 jjj=jjj+1
@@ -182,25 +189,27 @@ dev.off()
 #'
 #'
 #' @param inputPath path (folder) to the raw brain association maps (outputs of identifyClustersBWAS())
-#' @param bwasFile name of the brain association map (without extension)
-#' @param pathPhenotypeFile Path to the variable files (e.g. variable.phen) used get variance of the phenotype
+#' @param bwasFile name of the brain association map
+#' @param variancePheno Variance of the phenotype (used to standardise the effect sizes into correlations)
+#' @param signifThreshold pvalue significance threshold used to account for multiple testing
 #' @return Outside and Inside snapshots of the surfaces.
 #' @param outputPath path where the outputs will be written
-#' @import plyr png qqman readr Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices
+#' @import plyr png qqman Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices
 #' @export
-plotSubcortical=function(inputPath, bwasFile, pathPhenotypeFile, outputPath){
+plotSubcortical=function(inputPath, bwasFile, variancePheno, outputPath, signifThreshold){
+
   for (moda in c("thick", "LogJacs")){
  for (hemi in c("lh", "rh")){
-bwasPlot=read.table( paste0(inputPath, bwasFile , "_", moda, "_clustersAndCoordinates"), header=T)
-bwasPlot=bwasPlot[which(bwasPlot$hemi==hemi),]
+bwasPlot=vroom( paste0(inputPath, bwasFile ), show_col_types = F)
+bwasPlot=formatBWASsubcortical(BWASsumstat=bwasPlot, hemi=hemi, mod=moda)
 bwasPlot$X=bwasPlot$X*(-1)
 bwasPlot$Y=bwasPlot$Y*(-1)
 
-# Open phenotype file
-pheno=read.table(paste0(pathPhenotypeFile))
+# Transform betas in correlations (assumes all vertices have been standardised)
+bwasPlot$cor=bwasPlot$b/sqrt(variancePheno)
 
-# Transform betas in correlations
-bwasPlot$cor=bwasPlot$b/sqrt(var(pheno$V3, na.rm = T))
+# Identify significant vertices to plot
+bwasPlot$signifVoxel=ifelse(bwasPlot$p < signifThreshold, 1 ,0)
 
 # Atttribute colors on a diverging palette
 bwasPlot$colorScale <- cut(bwasPlot$cor, breaks = seq(-0.1, 0.1, len = 21),  include.lowest = TRUE)
@@ -214,14 +223,14 @@ bwasPlot$radius=ifelse(  bwasPlot$signifVoxel==1, 1.5 ,0.8 )
 # Draw plots and save screenshots
 par3d(windowRect = c(0, 0, 800, 800)*1.5, zoom=0.8)
 spheres3d(as.matrix(bwasPlot[,c( "Z",  "X", "Y")]), col=bwasPlot$color, radius = bwasPlot$radius)
-rgl.snapshot(paste0(outputPath, "/BWAS_", bwasFile, "_", hemi, "_", moda , "_clustersAndCoordinates_inside.png"))
+rgl.snapshot(paste0(outputPath, "/BWAS_", bwasFile, "_", hemi, "_", moda , "_inside.png"))
 rgl.close()
 
 bwasPlot$X=bwasPlot$X*(-1)
 bwasPlot$Z=bwasPlot$Z*(-1)
 par3d(windowRect = c(0, 0, 800, 800)*1.5, zoom=0.8)
 spheres3d(as.matrix(bwasPlot[,c( "Z",  "X", "Y")]), col=bwasPlot$color, radius = bwasPlot$radius)
-rgl.snapshot(paste0(outputPath, "/BWAS_", bwasFile,"_", hemi, "_", moda , "_clustersAndCoordinates_outside.png"))
+rgl.snapshot(paste0(outputPath, "/BWAS_", bwasFile,"_", hemi, "_", moda , "_outside.png"))
 rgl.close()
 
 }}
@@ -234,36 +243,38 @@ rgl.close()
 #' The function opens the phenotype file in order to calculate the variance of the phenotype, used to convert association betas into correlation coefficients.
 #'
 #'
-#' @param inputPath path (folder) to the brain association maps (outputs of identifyClustersBWAS())
-#' @param bwasFile name of the brain association map (without extension)
-#' @param pathPhenotypeFile Path to the variable files (e.g. variable.phen) used get variance of the phenotype
+#' @param inputPath path (folder) to the raw brain association maps (outputs of identifyClustersBWAS())
+#' @param bwasFile name of the brain association map
+#' @param variancePheno Variance of the phenotype (used to standardise the effect sizes into correlations)
+#' @param signifThreshold pvalue significance threshold used to account for multiple testing
 #' @return Outside and Inside snapshots of the surfaces.
 #' @param outputPath path where the outputs will be written
-#' @import plyr png qqman readr Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices
+#' @return Outside and Inside snapshots of the surfaces.
+#' @import plyr png qqman Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices vroom
 #' @export
-plotSubcortical_flat=function(inputPath, bwasFile, pathPhenotypeFile, outputPath){
+plotSubcortical_flat=function(inputPath, bwasFile, variancePheno, signifThreshold, outputPath){
 
-  for (moda in c("thick", "LogJacs")){
+for (moda in c("thick", "LogJacs")){
  for (hemi in c("lh", "rh")){
-bwasPlot=read.table(paste0(inputPath, bwasFile , "_", moda, "_clustersAndCoordinates"), header=T)
-bwasPlot=bwasPlot[which(bwasPlot$hemi==hemi),]
+bwasPlot=vroom( paste0(inputPath, bwasFile ), show_col_types = F)
+bwasPlot=formatBWASsubcortical(BWASsumstat=bwasPlot, hemi=hemi, mod=moda)
 bwasPlot$X=bwasPlot$X*(-1)
 bwasPlot$Y=bwasPlot$Y*(-1)
 
-# Open phenotype file
-pheno=read.table(paste0(pathPhenotypeFile))
+# Transform betas in correlations (assumes all vertices have been standardised)
+bwasPlot$cor=bwasPlot$b/sqrt(variancePheno)
 
-# Transform betas in correlations
-bwasPlot$cor=bwasPlot$b/sqrt(var(pheno$V3, na.rm = T))
+# Identify significant vertices to plot
+bwasPlot$signifVoxel=ifelse(bwasPlot$p < signifThreshold, 1 ,0)
 
 # Atttribute colors on a diverging palette
-bwasPlot$colorScale <- cut(bwasPlot$cor, breaks = seq(-0.4, 0.4, len = 21),  include.lowest = TRUE)
+bwasPlot$colorScale <- cut(bwasPlot$cor, breaks = seq(-0.1, 0.1, len = 21),  include.lowest = TRUE)
 
 ## Use bin indices, ii, to select color from vector of n-1 equally spaced colors
 cols=c(RColorBrewer::brewer.pal(n = 10, name = "RdYlBu")[10:6],RColorBrewer::brewer.pal(n = 10, name = "RdYlBu")[5:1]) # Select palette colours
 bwasPlot$color <- colorRampPalette(c(cols))(21)[bwasPlot$colorScale] # Make it more continuous
 bwasPlot$color[which(bwasPlot$signifVoxel==0)]="darkgrey"
-bwasPlot$radius=ifelse(  bwasPlot$signifVoxel==1, 2 ,0.8 )
+bwasPlot$radius=ifelse(  bwasPlot$signifVoxel==1, 1.5 ,0.8 )
 
 # Change coordinates for flat plotting
 if (hemi=="rh"){
@@ -272,22 +283,17 @@ bwasPlot$Xf=bwasPlot$X
 bwasPlot$Yf=bwasPlot$Y
 bwasPlot$Zf=bwasPlot$Z
 
-  # Hippocampus
+# Hippocampus
 bwasPlot$Yf[bwasPlot$ROINb %in% c(17,53)]=bwasPlot$Yf[bwasPlot$ROINb %in% c(17,53)]-17
-
 # Amygdala
 bwasPlot$Yf[bwasPlot$ROINb %in% c(18,54)]=bwasPlot$Yf[bwasPlot$ROINb %in% c(18,54)]-17
 bwasPlot$Zf[bwasPlot$ROINb %in% c(18,54)]=bwasPlot$Zf[bwasPlot$ROINb %in% c(18,54)]+7
-
 # Thalamus
 bwasPlot$Zf[bwasPlot$ROINb %in% c(10,49)]=bwasPlot$Zf[bwasPlot$ROINb %in% c(10,49)]-20
-
 # Caudate
 bwasPlot$Yf[bwasPlot$ROINb %in% c(11,50)]=bwasPlot$Yf[bwasPlot$ROINb %in% c(11,50)]+20
-
 # Accumbens
 bwasPlot$Zf[bwasPlot$ROINb %in% c(26,58)]=bwasPlot$Zf[bwasPlot$ROINb %in% c(26,58)]+12
-
 # Pallidum
 bwasPlot$Yf[bwasPlot$ROINb %in% c(13,52)]=bwasPlot$Yf[bwasPlot$ROINb %in% c(13,52)]-15
 
@@ -295,19 +301,14 @@ bwasPlot$Yf[bwasPlot$ROINb %in% c(13,52)]=bwasPlot$Yf[bwasPlot$ROINb %in% c(13,5
 bwasPlot$Xf2=bwasPlot$Xf*(-1)
 bwasPlot$Zf2=bwasPlot$Zf*(-1)
 bwasPlot$Yf2=bwasPlot$Yf
-
 # Accumbens
 bwasPlot$Zf2[bwasPlot$ROINb %in% c(26,58)]=bwasPlot$Zf2[bwasPlot$ROINb %in% c(26,58)]-7
-
 # Pallidum
 bwasPlot$Yf2[bwasPlot$ROINb %in% c(13,52)]=bwasPlot$Yf2[bwasPlot$ROINb %in% c(13,52)]-8
-
 # Amygdala
 bwasPlot$Yf2[bwasPlot$ROINb %in% c(18,54)]=bwasPlot$Yf2[bwasPlot$ROINb %in% c(18,54)]-5
-
 # Hippocampus
 bwasPlot$Yf2[bwasPlot$ROINb %in% c(17,53)]=bwasPlot$Yf2[bwasPlot$ROINb %in% c(17,53)]-5
-
 # Caudate
 bwasPlot$Yf2[bwasPlot$ROINb %in% c(11,50)]=bwasPlot$Yf2[bwasPlot$ROINb %in% c(11,50)]-8
 ##########################
@@ -317,23 +318,17 @@ bwasPlot$Yf2[bwasPlot$ROINb %in% c(11,50)]=bwasPlot$Yf2[bwasPlot$ROINb %in% c(11
 bwasPlot$Xf=bwasPlot$X
 bwasPlot$Yf=bwasPlot$Y
 bwasPlot$Zf=bwasPlot$Z
-
-  # Hippocampus
+# Hippocampus
 bwasPlot$Yf[bwasPlot$ROINb %in% c(17,53)]=bwasPlot$Yf[bwasPlot$ROINb %in% c(17,53)]-21
-
 # Amygdala
 bwasPlot$Yf[bwasPlot$ROINb %in% c(18,54)]=bwasPlot$Yf[bwasPlot$ROINb %in% c(18,54)]-21
 bwasPlot$Zf[bwasPlot$ROINb %in% c(18,54)]=bwasPlot$Zf[bwasPlot$ROINb %in% c(18,54)]+7
-
 # Thalamus
 bwasPlot$Zf[bwasPlot$ROINb %in% c(10,49)]=bwasPlot$Zf[bwasPlot$ROINb %in% c(10,49)]-20
-
 # Caudate
 bwasPlot$Yf[bwasPlot$ROINb %in% c(11,50)]=bwasPlot$Yf[bwasPlot$ROINb %in% c(11,50)]+12
-
 # Accumbens
 bwasPlot$Zf[bwasPlot$ROINb %in% c(26,58)]=bwasPlot$Zf[bwasPlot$ROINb %in% c(26,58)]+19
-
 # Pallidum
 bwasPlot$Yf[bwasPlot$ROINb %in% c(13,52)]=bwasPlot$Yf[bwasPlot$ROINb %in% c(13,52)]-22
 
@@ -341,22 +336,16 @@ bwasPlot$Yf[bwasPlot$ROINb %in% c(13,52)]=bwasPlot$Yf[bwasPlot$ROINb %in% c(13,5
 bwasPlot$Xf2=bwasPlot$Xf*(-1)
 bwasPlot$Zf2=bwasPlot$Zf*(-1)
 bwasPlot$Yf2=bwasPlot$Yf
-
 # Caudate
 bwasPlot$Yf2[bwasPlot$ROINb %in% c(11,50)]=bwasPlot$Yf2[bwasPlot$ROINb %in% c(11,50)]+8
-
 # Pallidum
 bwasPlot$Yf2[bwasPlot$ROINb %in% c(13,52)]=bwasPlot$Yf2[bwasPlot$ROINb %in% c(13,52)]+6
-
 # Amygdala
 bwasPlot$Yf2[bwasPlot$ROINb %in% c(18,54)]=bwasPlot$Yf2[bwasPlot$ROINb %in% c(18,54)]+3
-
 # Hippocampus
 bwasPlot$Yf2[bwasPlot$ROINb %in% c(17,53)]=bwasPlot$Yf2[bwasPlot$ROINb %in% c(17,53)]+3
-
 # Accumbens
 bwasPlot$Zf2[bwasPlot$ROINb %in% c(26,58)]=bwasPlot$Zf2[bwasPlot$ROINb %in% c(26,58)]+6
-
 # Thalamus
 bwasPlot$Zf2[bwasPlot$ROINb %in% c(10,49)]=bwasPlot$Zf2[bwasPlot$ROINb %in% c(10,49)]+2
 
@@ -383,26 +372,29 @@ rgl.close()
 #' The function opens the phenotype file in order to calculate the variance of the phenotype, used to convert association betas into correlation coefficients.
 #'
 #'
-#' @param inputPath path (folder) to the brain association maps (outputs of identifyClustersBWAS())
-#' @param bwasFile name of the brain association map (without extension)
-#' @param pathPhenotypeFile Path to the variable files (e.g. variable.phen) used get variance of the phenotype
+#' @param inputPath path (folder) to the raw brain association maps (outputs of identifyClustersBWAS())
+#' @param bwasFile name of the brain association map
+#' @param variancePheno Variance of the phenotype (used to standardise the effect sizes into correlations)
+#' @param signifThreshold pvalue significance threshold used to account for multiple testing
+#' @return Outside and Inside snapshots of the surfaces.
 #' @param outputPath path where the outputs will be written
 #' @return Outside and Inside snapshots of the surfaces.
-#' @import plyr png qqman readr Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices
+#' @import plyr png qqman Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices vroom
 #' @export
-plotCortical=function(inputPath, bwasFile, pathPhenotypeFile, outputPath){
+plotCortical=function(inputPath, bwasFile, variancePheno, signifThreshold, outputPath){
 
  for (moda in c("area", "thickness")){
 
  for (hemi in c("rh", "lh")){
-bwasPlot=read.table(paste0(inputPath, bwasFile , "_", moda, "_clustersAndCoordinates"), header=T)
-bwasPlot=bwasPlot[which(bwasPlot$hemi==hemi),]
 
-# Open phenotype file
-pheno=read.table(paste0(pathPhenotypeFile))
+bwasPlot=vroom(paste0(inputPath, bwasFile ) , show_col_types = F)
+bwasPlot=formatBWAScortical(BWASsumstat = bwasPlot, hemi = hemi, mod = moda)
 
 # Transform betas in correlations
-bwasPlot$cor=bwasPlot$b/sqrt(var(pheno$V3, na.rm = T))
+bwasPlot$cor=bwasPlot$b/sqrt(variancePheno)
+
+# Identify significant vertices to plot
+bwasPlot$signifVoxel=ifelse(bwasPlot$p < signifThreshold, 1 ,0)
 
 # Atttribute colors on a diverging palette
 bwasPlot$colorScale <- cut(bwasPlot$cor, breaks = seq(-0.4, 0.4, len = 21),  include.lowest = TRUE)
@@ -413,22 +405,17 @@ bwasPlot$color <- colorRampPalette(c(cols))(21)[bwasPlot$colorScale] # Make it m
 bwasPlot$color[which(bwasPlot$signifVoxel==0)]="darkgrey"
 bwasPlot$radius=ifelse(bwasPlot$signifVoxel==1, 2, 0.8)
 
-#bwasPlot2=bwasPlot[sample(1:length(bwasPlot$ProbeID), size = 10000),]
-#bwasPlot2=rbind(bwasPlot2, bwasPlot[which(bwasPlot$signifVoxel==1 | bwasPlot$inCluster>0 ),])
-bwasPlot2=bwasPlot
-
-
 # Draw plot
 par3d(windowRect = c(0, 0, 800, 800)*1.5, zoom=0.8)
-spheres3d(as.matrix(bwasPlot2[,c( "Y","X", "Z")]), col=bwasPlot2$color, radius = bwasPlot2$radius)
-rgl.snapshot(paste0(outputPath, "/BWAS_", bwasFile,"_", hemi, "_", moda , "_clustersAndCoordinates_inside.png"))
+spheres3d(as.matrix(bwasPlot[,c( "Y","X", "Z")]), col=bwasPlot$color, radius = bwasPlot$radius)
+rgl.snapshot(paste0(outputPath, "/BWAS_", bwasFile,"_", hemi, "_", moda , "_inside.png"))
 rgl.close()
 
-bwasPlot2$X=bwasPlot2$X*(-1)
-bwasPlot2$Y=bwasPlot2$Y*(-1)
+bwasPlot$X=bwasPlot$X*(-1)
+bwasPlot$Y=bwasPlot$Y*(-1)
 par3d(windowRect = c(0, 0, 800, 800)*1.5, zoom=0.8)
-spheres3d(as.matrix(bwasPlot2[,c( "Y","X", "Z")]), col=bwasPlot2$color, radius = bwasPlot2$radius)
-rgl.snapshot(paste0(outputPath, "/BWAS_", bwasFile,"_", hemi, "_", moda , "_clustersAndCoordinates_outside.png"))
+spheres3d(as.matrix(bwasPlot[,c( "Y","X", "Z")]), col=bwasPlot$color, radius = bwasPlot$radius)
+rgl.snapshot(paste0(outputPath, "/BWAS_", bwasFile,"_", hemi, "_", moda , "_outside.png"))
 rgl.close()
 
 }}
@@ -445,7 +432,7 @@ rgl.close()
 #' @param pathToLegendBar Path to the manually created legend bar
 #' @param outputPath path where the outputs will be written
 #' @return Outside and Inside snapshots of the surfaces.
-#' @import plyr png qqman readr Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices
+#' @import plyr png qqman Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices
 #' @export
 combineCorticalSubcorticalPlots=function(inputPath, bwasFile, pathToLegendBar, outputPath){
 
