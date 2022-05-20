@@ -54,7 +54,7 @@ layout(matrix(c(1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,6,7,8), nrow =1 , ncol = 20, b
 
 # Open summary statistics
 BWASsumstatfilePath = paste0(inputPath ,  bwasFile)
-BWASsumstatfile<-  vroom(BWASsumstatfilePath)
+BWASsumstatfile<-  vroom(BWASsumstatfilePath, show_col_types = F)
 BWASsumstatfile$log10p<- -log10(BWASsumstatfile$p)
 
 # Loop on modality and hemispheres to annotate summary statistics and plot sections of Manhattan plot

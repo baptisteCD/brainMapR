@@ -25,6 +25,7 @@ BWASsumstat<-BWASsumstat[order(BWASsumstat$order),]
 BWASsumstat$xax<-1:length(BWASsumstat[,1])
 
 # Give some details to user
+print(paste(hemi, mod))
 print(paste(length(BWASsumstat$Probe), "vertices annotated") )
 
 return(BWASsumstat)
@@ -56,6 +57,7 @@ BWASsumstat<-BWASsumstat[order(BWASsumstat$ROINb),]
 BWASsumstat$xax<-1:length(BWASsumstat[,1])
 
 # Give some details to user
+print(paste(hemi, mod))
 print(paste(length(BWASsumstat$Probe), "vertices annotated") )
 
 return(BWASsumstat)
