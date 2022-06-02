@@ -163,7 +163,7 @@ bwas=vroom(paste0(inputPaths[1], "/BWAS_fullSummary_", bwasFiles[1], ".csv"), sh
     print(paste0(inputPaths[1], "/BWAS_fullSummary_", bwasFiles[1], ".csv", "  not found, please check that the path is correct or that you have run BrainMapAnnotAndManhattanPlot() first"))
 }
 qqplot(bwas$p, col=colourList[1])
- print(round(median(bwas$CHI2,na.rm=T)/qchisq(0.5,df=1),3))
+print(paste0("lambda=",round(median(bwas$CHI2,na.rm=T)/qchisq(0.5,df=1),3)))
 legend(x = "bottom", inset = c(0.-0.5), legend = legendList ,pch=20, pt.cex=1.5,  col = colourList, xpd = TRUE, horiz = TRUE)
 
 jjj=2
