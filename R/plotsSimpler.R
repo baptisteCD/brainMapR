@@ -156,15 +156,16 @@ if (qqPlot==T){
 superimposedQQplot=function(inputPaths , bwasFiles, legendList, colourList, phenotypeLabel, outputPath){
 
 # Initialise plot with first scenario
-png(paste0(outputPath, "QQplotCombined_assocVertices", phenotypeLabel, ".png"), width = 15, height = 15, units = "cm", res=400)
-par(mar=c(15,4,2,1))
+png(paste0(outputPath, "QQplotCombined_assocVertices", phenotypeLabel, ".png"), width = 20, height = 15, units = "cm", res=400)
+par(mar=c(4,4,2,10))
 if (file.exists(paste0(inputPaths[1], "/BWAS_fullSummary_", bwasFiles[1], ".csv"))){
 bwas=vroom(paste0(inputPaths[1], "/BWAS_fullSummary_", bwasFiles[1], ".csv"), show_col_types = F)} else {
     print(paste0(inputPaths[1], "/BWAS_fullSummary_", bwasFiles[1], ".csv", "  not found, please check that the path is correct or that you have run BrainMapAnnotAndManhattanPlot() first"))
 }
+coord <- par("usr") # options for legend position
 qqplot(bwas$p, col=colourList[1])
+legend(x = coord[2] * 1.05, y = coord[4], legend = legendList ,pch=20, pt.cex=1.5,  col = colourList, xpd = TRUE)
 print(paste0("lambda=",round(median(bwas$CHI2,na.rm=T)/qchisq(0.5,df=1),3)))
-legend(x = "bottom", inset = c(0.-0.5), legend = legendList ,pch=20, pt.cex=1.5,  col = colourList, xpd = TRUE, horiz = TRUE)
 
 jjj=2
  for (scenario in legendList[-1] ){
