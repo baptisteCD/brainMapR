@@ -157,7 +157,7 @@ superimposedQQplot=function(inputPaths , bwasFiles, legendList, colourList, phen
 
 # Initialise plot with first scenario
 png(paste0(outputPath, "QQplotCombined_assocVertices", phenotypeLabel, ".png"), width = 15, height = 15, units = "cm", res=400)
-par(mar=c(4,4,2,1))
+par(mar=c(7,4,2,1))
 if (file.exists(paste0(inputPaths[1], "/BWAS_fullSummary_", bwasFiles[1], ".csv"))){
 bwas=vroom(paste0(inputPaths[1], "/BWAS_fullSummary_", bwasFiles[1], ".csv"), show_col_types = F)} else {
     print(paste0(inputPaths[1], "/BWAS_fullSummary_", bwasFiles[1], ".csv", "  not found, please check that the path is correct or that you have run BrainMapAnnotAndManhattanPlot() first"))
@@ -173,7 +173,7 @@ bwas=vroom(paste0(inputPaths[jjj], "/BWAS_fullSummary_", bwasFiles[jjj], ".csv")
  print(paste0(inputPaths[jjj], "/BWAS_fullSummary_", bwasFiles[jjj], ".csv", "  not found, please check that the path is correct or that you have run BrainMapAnnotAndManhattanPlot() first"))
 }
 qqplot(bwas$p, col=colourList[jjj], add=T)
- print(print(round(median(bwas$CHI2,na.rm=T)/qchisq(0.5,df=1),3)))
+print(paste0("lambda=",round(median(bwas$CHI2,na.rm=T)/qchisq(0.5,df=1),3)))
 jjj=jjj+1
  }
 
