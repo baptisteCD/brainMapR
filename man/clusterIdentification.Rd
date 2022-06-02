@@ -5,7 +5,7 @@
 \title{Identify and describe all significant clusters from a brain association maps}
 \usage{
 clusterIdentification(
-  path,
+  outputFolder,
   bwas,
   moda,
   signifThreshold,
@@ -14,7 +14,7 @@ clusterIdentification(
 )
 }
 \arguments{
-\item{path}{path to the output/writing directory}
+\item{outputFolder}{path to the output/writing directory}
 
 \item{bwas}{Formatted brain association map}
 
