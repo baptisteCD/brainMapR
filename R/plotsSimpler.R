@@ -164,7 +164,7 @@ bwas=vroom(paste0(inputPaths[1], "/BWAS_fullSummary_", bwasFiles[1], ".csv"), sh
 }
 qqplot(bwas$p, col=colourList[1])
  print(round(median(bwas$CHI2,na.rm=T)/qchisq(0.5,df=1),3))
-legend(x = 3.5, y = 0.75*max(bwas$log10p), legend = legendList ,pch=20, pt.cex=1.5,  col = colourList)
+legend(x = "bottom", inset = c(0.-0.5), legend = legendList ,pch=20, pt.cex=1.5,  col = colourList, xpd = TRUE, horiz = TRUE)
 
 jjj=2
  for (scenario in legendList[-1] ){
