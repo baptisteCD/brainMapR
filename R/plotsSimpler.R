@@ -162,8 +162,8 @@ if (file.exists(paste0(inputPaths[1], "/BWAS_fullSummary_", bwasFiles[1], ".csv"
 bwas=vroom(paste0(inputPaths[1], "/BWAS_fullSummary_", bwasFiles[1], ".csv"), show_col_types = F)} else {
     print(paste0(inputPaths[1], "/BWAS_fullSummary_", bwasFiles[1], ".csv", "  not found, please check that the path is correct or that you have run BrainMapAnnotAndManhattanPlot() first"))
 }
-coord <- par("usr") # options for legend position
 qqplot(bwas$p, col=colourList[1])
+coord <- par("usr") # options for legend position
 legend(x = coord[2] * 1.05, y = coord[4], legend = legendList ,pch=20, pt.cex=1.5,  col = colourList, xpd = TRUE)
 print(paste0("lambda=",round(median(bwas$CHI2,na.rm=T)/qchisq(0.5,df=1),3)))
 
@@ -193,11 +193,12 @@ dev.off()
 #' @param bwasFile name of the brain association map
 #' @param variancePheno Variance of the phenotype (used to standardise the effect sizes into correlations)
 #' @param signifThreshold pvalue significance threshold used to account for multiple testing
-#' @return Outside and Inside snapshots of the surfaces.
+#' @param correlationRange range of the correlation coefficients (for improved colors) - default is [-1; 1]
 #' @param outputPath path where the outputs will be written
+#' @return Outside and Inside snapshots of the surfaces.
 #' @import plyr png qqman Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices
 #' @export
-plotSubcortical=function(inputPath, bwasFile, variancePheno, outputPath, signifThreshold){
+plotSubcortical=function(inputPath, bwasFile, variancePheno, outputPath, signifThreshold, correlationRange=c(-1,1)){
 
   for (moda in c("thick", "LogJacs")){
  for (hemi in c("lh", "rh")){
@@ -213,7 +214,7 @@ bwasPlot$cor=bwasPlot$b/sqrt(variancePheno)
 bwasPlot$signifVoxel=ifelse(bwasPlot$p < signifThreshold, 1 ,0)
 
 # Atttribute colors on a diverging palette
-bwasPlot$colorScale <- cut(bwasPlot$cor, breaks = seq(-0.1, 0.1, len = 21),  include.lowest = TRUE)
+bwasPlot$colorScale <- cut(bwasPlot$cor, breaks = seq(correlationRange[1], correlationRange[2], len = 21),  include.lowest = TRUE)
 
 ## Use bin indices, ii, to select color from vector of n-1 equally spaced colors
 cols=c(RColorBrewer::brewer.pal(n = 10, name = "RdYlBu")[10:6],RColorBrewer::brewer.pal(n = 10, name = "RdYlBu")[5:1]) # Select palette colours
@@ -248,12 +249,12 @@ rgl.close()
 #' @param bwasFile name of the brain association map
 #' @param variancePheno Variance of the phenotype (used to standardise the effect sizes into correlations)
 #' @param signifThreshold pvalue significance threshold used to account for multiple testing
-#' @return Outside and Inside snapshots of the surfaces.
+#' @param correlationRange range of the correlation coefficients (for improved colors) - default is [-1; 1]
 #' @param outputPath path where the outputs will be written
 #' @return Outside and Inside snapshots of the surfaces.
 #' @import plyr png qqman Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices vroom
 #' @export
-plotSubcortical_flat=function(inputPath, bwasFile, variancePheno, signifThreshold, outputPath){
+plotSubcortical_flat=function(inputPath, bwasFile, variancePheno, signifThreshold, outputPath, correlationRange=c(-1,1)){
 
 for (moda in c("thick", "LogJacs")){
  for (hemi in c("lh", "rh")){
@@ -269,7 +270,7 @@ bwasPlot$cor=bwasPlot$b/sqrt(variancePheno)
 bwasPlot$signifVoxel=ifelse(bwasPlot$p < signifThreshold, 1 ,0)
 
 # Atttribute colors on a diverging palette
-bwasPlot$colorScale <- cut(bwasPlot$cor, breaks = seq(-0.1, 0.1, len = 21),  include.lowest = TRUE)
+bwasPlot$colorScale <- cut(bwasPlot$cor, breaks = seq(correlationRange[1], correlationRange[2], len = 21),  include.lowest = TRUE)
 
 ## Use bin indices, ii, to select color from vector of n-1 equally spaced colors
 cols=c(RColorBrewer::brewer.pal(n = 10, name = "RdYlBu")[10:6],RColorBrewer::brewer.pal(n = 10, name = "RdYlBu")[5:1]) # Select palette colours
@@ -277,80 +278,8 @@ bwasPlot$color <- colorRampPalette(c(cols))(21)[bwasPlot$colorScale] # Make it m
 bwasPlot$color[which(bwasPlot$signifVoxel==0)]="darkgrey"
 bwasPlot$radius=ifelse(  bwasPlot$signifVoxel==1, 1.5 ,0.8 )
 
-# Change coordinates for flat plotting
-if (hemi=="rh"){
-
-bwasPlot$Xf=bwasPlot$X
-bwasPlot$Yf=bwasPlot$Y
-bwasPlot$Zf=bwasPlot$Z
-
-# Hippocampus
-bwasPlot$Yf[bwasPlot$ROINb %in% c(17,53)]=bwasPlot$Yf[bwasPlot$ROINb %in% c(17,53)]-17
-# Amygdala
-bwasPlot$Yf[bwasPlot$ROINb %in% c(18,54)]=bwasPlot$Yf[bwasPlot$ROINb %in% c(18,54)]-17
-bwasPlot$Zf[bwasPlot$ROINb %in% c(18,54)]=bwasPlot$Zf[bwasPlot$ROINb %in% c(18,54)]+7
-# Thalamus
-bwasPlot$Zf[bwasPlot$ROINb %in% c(10,49)]=bwasPlot$Zf[bwasPlot$ROINb %in% c(10,49)]-20
-# Caudate
-bwasPlot$Yf[bwasPlot$ROINb %in% c(11,50)]=bwasPlot$Yf[bwasPlot$ROINb %in% c(11,50)]+20
-# Accumbens
-bwasPlot$Zf[bwasPlot$ROINb %in% c(26,58)]=bwasPlot$Zf[bwasPlot$ROINb %in% c(26,58)]+12
-# Pallidum
-bwasPlot$Yf[bwasPlot$ROINb %in% c(13,52)]=bwasPlot$Yf[bwasPlot$ROINb %in% c(13,52)]-15
-
-# Second set of coordinates
-bwasPlot$Xf2=bwasPlot$Xf*(-1)
-bwasPlot$Zf2=bwasPlot$Zf*(-1)
-bwasPlot$Yf2=bwasPlot$Yf
-# Accumbens
-bwasPlot$Zf2[bwasPlot$ROINb %in% c(26,58)]=bwasPlot$Zf2[bwasPlot$ROINb %in% c(26,58)]-7
-# Pallidum
-bwasPlot$Yf2[bwasPlot$ROINb %in% c(13,52)]=bwasPlot$Yf2[bwasPlot$ROINb %in% c(13,52)]-8
-# Amygdala
-bwasPlot$Yf2[bwasPlot$ROINb %in% c(18,54)]=bwasPlot$Yf2[bwasPlot$ROINb %in% c(18,54)]-5
-# Hippocampus
-bwasPlot$Yf2[bwasPlot$ROINb %in% c(17,53)]=bwasPlot$Yf2[bwasPlot$ROINb %in% c(17,53)]-5
-# Caudate
-bwasPlot$Yf2[bwasPlot$ROINb %in% c(11,50)]=bwasPlot$Yf2[bwasPlot$ROINb %in% c(11,50)]-8
-##########################
-} else if (hemi == "lh"){
-# Second set of coordinates
-
-bwasPlot$Xf=bwasPlot$X
-bwasPlot$Yf=bwasPlot$Y
-bwasPlot$Zf=bwasPlot$Z
-# Hippocampus
-bwasPlot$Yf[bwasPlot$ROINb %in% c(17,53)]=bwasPlot$Yf[bwasPlot$ROINb %in% c(17,53)]-21
-# Amygdala
-bwasPlot$Yf[bwasPlot$ROINb %in% c(18,54)]=bwasPlot$Yf[bwasPlot$ROINb %in% c(18,54)]-21
-bwasPlot$Zf[bwasPlot$ROINb %in% c(18,54)]=bwasPlot$Zf[bwasPlot$ROINb %in% c(18,54)]+7
-# Thalamus
-bwasPlot$Zf[bwasPlot$ROINb %in% c(10,49)]=bwasPlot$Zf[bwasPlot$ROINb %in% c(10,49)]-20
-# Caudate
-bwasPlot$Yf[bwasPlot$ROINb %in% c(11,50)]=bwasPlot$Yf[bwasPlot$ROINb %in% c(11,50)]+12
-# Accumbens
-bwasPlot$Zf[bwasPlot$ROINb %in% c(26,58)]=bwasPlot$Zf[bwasPlot$ROINb %in% c(26,58)]+19
-# Pallidum
-bwasPlot$Yf[bwasPlot$ROINb %in% c(13,52)]=bwasPlot$Yf[bwasPlot$ROINb %in% c(13,52)]-22
-
-# Second set of coordinates
-bwasPlot$Xf2=bwasPlot$Xf*(-1)
-bwasPlot$Zf2=bwasPlot$Zf*(-1)
-bwasPlot$Yf2=bwasPlot$Yf
-# Caudate
-bwasPlot$Yf2[bwasPlot$ROINb %in% c(11,50)]=bwasPlot$Yf2[bwasPlot$ROINb %in% c(11,50)]+8
-# Pallidum
-bwasPlot$Yf2[bwasPlot$ROINb %in% c(13,52)]=bwasPlot$Yf2[bwasPlot$ROINb %in% c(13,52)]+6
-# Amygdala
-bwasPlot$Yf2[bwasPlot$ROINb %in% c(18,54)]=bwasPlot$Yf2[bwasPlot$ROINb %in% c(18,54)]+3
-# Hippocampus
-bwasPlot$Yf2[bwasPlot$ROINb %in% c(17,53)]=bwasPlot$Yf2[bwasPlot$ROINb %in% c(17,53)]+3
-# Accumbens
-bwasPlot$Zf2[bwasPlot$ROINb %in% c(26,58)]=bwasPlot$Zf2[bwasPlot$ROINb %in% c(26,58)]+6
-# Thalamus
-bwasPlot$Zf2[bwasPlot$ROINb %in% c(10,49)]=bwasPlot$Zf2[bwasPlot$ROINb %in% c(10,49)]+2
-
-}
+# Add flat coordinates
+bwasPlot=addFlatCoordinatesSubcortical(annotBwas = bwasPlot, hemi = hemi)
 
 # Draw plots and save screenshots
 par3d(windowRect = c(0, 0, 800, 800)*1.5, zoom=0.8)
@@ -377,12 +306,13 @@ rgl.close()
 #' @param bwasFile name of the brain association map
 #' @param variancePheno Variance of the phenotype (used to standardise the effect sizes into correlations)
 #' @param signifThreshold pvalue significance threshold used to account for multiple testing
-#' @return Outside and Inside snapshots of the surfaces.
+#' @param correlationRange range of the correlation coefficients (for improved colors) - default is [-1; 1]
 #' @param outputPath path where the outputs will be written
 #' @return Outside and Inside snapshots of the surfaces.
 #' @import plyr png qqman Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices vroom
 #' @export
-plotCortical=function(inputPath, bwasFile, variancePheno, signifThreshold, outputPath){
+plotCortical=function(inputPath, bwasFile, variancePheno, signifThreshold, outputPath, correlationRange=c(-1,1)
+){
 
  for (moda in c("area", "thickness")){
 
@@ -398,7 +328,7 @@ bwasPlot$cor=bwasPlot$b/sqrt(variancePheno)
 bwasPlot$signifVoxel=ifelse(bwasPlot$p < signifThreshold, 1 ,0)
 
 # Atttribute colors on a diverging palette
-bwasPlot$colorScale <- cut(bwasPlot$cor, breaks = seq(-0.4, 0.4, len = 21),  include.lowest = TRUE)
+bwasPlot$colorScale <- cut(bwasPlot$cor, breaks = seq(correlationRange[1], correlationRange[2], len = 21),  include.lowest = TRUE)
 
 ## Use bin indices, ii, to select color from vector of n-1 equally spaced colors
 cols=c(RColorBrewer::brewer.pal(n = 10, name = "RdYlBu")[10:6], RColorBrewer::brewer.pal(n = 10, name = "RdYlBu")[5:1]) # Select palette colours
@@ -465,6 +395,247 @@ lay <- rbind(c(1,1,3,3,5,5,7,7,9,9,11,11,13,13,15,15,17),
 gs=grid.arrange(grobs = plots2, layout_matrix = lay)
 ggsave(paste0(outputPath, "/Plots_Combined", bwasFile, ".png"),width=18, height=4, gs)
 
+}
+
+#' Subcortical GIF
+#'
+#' This function reads in a brain association map.
+#' It produces snapshots of the brain surfaces, with a slight rotation angle, which can be used to make a GIF
+#' The function needs the variance of the phenotype, in order to convert association betas into correlation coefficients.
+#'
+#'
+#' @param inputPath path (folder) to the raw brain association maps
+#' @param bwasFile name of the brain association map
+#' @param variancePheno Variance of the phenotype (used to standardise the effect sizes into correlations)
+#' @param signifThreshold pvalue significance threshold
+#' @param moda modality to plot ("thick" or "LogJacs")
+#' @param hemi hemisphere to plot ("lh" or "rh")
+#' @param nbImagesForGif Number of png images to generate for the gif. The larger the smoother the gif, but the longer it takes to generate.
+#' @param outputPath path where the outputs will be written
+#' @param correlationRange range of the correlation coefficients (for improved colors) - default is [-1; 1]
+#' @return Several snapshots of the surfaces.
+#' @import plyr png qqman Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices mvMonitoring
+#' @export
+plotSubcorticalGIF=function(inputPath, bwasFile, variancePheno, outputPath, hemi, moda, signifThreshold, nbImagesForGif, correlationRange=c(-1,1)){
+
+# Open and format
+bwasPlot=vroom( paste0(inputPath, bwasFile ), show_col_types = F)
+bwasPlot=formatBWASsubcortical(BWASsumstat=bwasPlot, hemi=hemi, mod=moda)
+bwasPlot$X=bwasPlot$X*(-1)
+bwasPlot$Y=bwasPlot$Y*(-1)
+
+# Transform betas in correlations (assumes all vertices have been standardised)
+bwasPlot$cor=bwasPlot$b/sqrt(variancePheno)
+
+# Identify significant vertices to plot
+bwasPlot$signifVoxel=ifelse(bwasPlot$p < signifThreshold, 1 ,0)
+
+# Atttribute colors on a diverging palette
+bwasPlot$colorScale <- cut(bwasPlot$cor, breaks = seq(correlationRange[1], correlationRange[2], len = 21),  include.lowest = TRUE)
+
+## Use bin indices, ii, to select color from vector of n-1 equally spaced colors
+cols=c(RColorBrewer::brewer.pal(n = 10, name = "RdYlBu")[10:6],RColorBrewer::brewer.pal(n = 10, name = "RdYlBu")[5:1]) # Select palette colours
+bwasPlot$color <- colorRampPalette(c(cols))(21)[bwasPlot$colorScale] # Make it more continuous
+bwasPlot$color[which(bwasPlot$signifVoxel==0)]="darkgrey"
+bwasPlot$radius=ifelse( bwasPlot$signifVoxel==1, 1.5 ,0.8 )
+
+for (iii in 1:nbImagesForGif){
+# Draw plots and save screenshots
+par3d(windowRect = c(0, 0, 800, 800)*1.5, zoom=0.8)
+spheres3d(as.matrix(bwasPlot[,c( "Z",  "X", "Y")]), col=bwasPlot$color, radius = bwasPlot$radius)
+rgl.snapshot(paste0(outputPath, "/BWAS_", bwasFile, "_", hemi, "_", moda , "_GIF", iii, ".png"))
+rgl.close()
+
+plotMax=as.matrix(bwasPlot[,c( "Z",  "X", "Y")]) %*% rotateScale3D(rot_angles = c(360/nbImagesForGif,0,0))
+plotMax=as.data.frame(plotMax)
+bwasPlot$Z=plotMax[,1]
+bwasPlot$X=plotMax[,2]
+bwasPlot$Y=plotMax[,3]
+}
+
+}
+
+#' Add new coordinates to subcortical annotated maps - which allow for flat plotting
+#'
+#' This function reads in an annotated subcortical brain association map
+#' It add additional sets of coordinates for flat plotting
+#'
+#'
+#' @param annotBwas Annotated subcortical brain map
+#' @param hemi Hemisphere ("lh" or "rh")
+#' @return Annotated subcortical brain map with additional coordiantes
+#' @import plyr png qqman Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices mvMonitoring
+#' @export
+addFlatCoordinatesSubcortical=function(annotBwas, hemi){
+
+# Change coordinates for flat plotting
+if (hemi=="rh"){
+
+annotBwas$Xf=annotBwas$X
+annotBwas$Yf=annotBwas$Y
+annotBwas$Zf=annotBwas$Z
+
+# Hippocampus
+annotBwas$Yf[annotBwas$ROINb %in% c(17,53)]=annotBwas$Yf[annotBwas$ROINb %in% c(17,53)]-22
+# Amygdala
+annotBwas$Yf[annotBwas$ROINb %in% c(18,54)]=annotBwas$Yf[annotBwas$ROINb %in% c(18,54)]-22
+annotBwas$Zf[annotBwas$ROINb %in% c(18,54)]=annotBwas$Zf[annotBwas$ROINb %in% c(18,54)]+9
+# Thalamus
+annotBwas$Zf[annotBwas$ROINb %in% c(10,49)]=annotBwas$Zf[annotBwas$ROINb %in% c(10,49)]-22
+# Caudate
+annotBwas$Yf[annotBwas$ROINb %in% c(11,50)]=annotBwas$Yf[annotBwas$ROINb %in% c(11,50)]+24
+# Accumbens
+annotBwas$Zf[annotBwas$ROINb %in% c(26,58)]=annotBwas$Zf[annotBwas$ROINb %in% c(26,58)]+14
+# Pallidum
+annotBwas$Yf[annotBwas$ROINb %in% c(13,52)]=annotBwas$Yf[annotBwas$ROINb %in% c(13,52)]-17
+
+# Second set of coordinates (outside view)
+annotBwas$Xf2=annotBwas$Xf*(-1)
+annotBwas$Zf2=annotBwas$Zf*(-1)
+annotBwas$Yf2=annotBwas$Yf
+# Accumbens
+annotBwas$Zf2[annotBwas$ROINb %in% c(26,58)]=annotBwas$Zf2[annotBwas$ROINb %in% c(26,58)]-7
+# Pallidum
+annotBwas$Yf2[annotBwas$ROINb %in% c(13,52)]=annotBwas$Yf2[annotBwas$ROINb %in% c(13,52)]-8
+# Amygdala
+annotBwas$Yf2[annotBwas$ROINb %in% c(18,54)]=annotBwas$Yf2[annotBwas$ROINb %in% c(18,54)]-5
+# Hippocampus
+annotBwas$Yf2[annotBwas$ROINb %in% c(17,53)]=annotBwas$Yf2[annotBwas$ROINb %in% c(17,53)]-5
+# Caudate
+annotBwas$Yf2[annotBwas$ROINb %in% c(11,50)]=annotBwas$Yf2[annotBwas$ROINb %in% c(11,50)]-8
+##########################
+} else if (hemi == "lh"){
+# Second set of coordinates
+
+annotBwas$Xf=annotBwas$X
+annotBwas$Yf=annotBwas$Y
+annotBwas$Zf=annotBwas$Z
+# Hippocampus
+annotBwas$Yf[annotBwas$ROINb %in% c(17,53)]=annotBwas$Yf[annotBwas$ROINb %in% c(17,53)]-25
+# Amygdala
+annotBwas$Yf[annotBwas$ROINb %in% c(18,54)]=annotBwas$Yf[annotBwas$ROINb %in% c(18,54)]-25
+annotBwas$Zf[annotBwas$ROINb %in% c(18,54)]=annotBwas$Zf[annotBwas$ROINb %in% c(18,54)]+9
+# Thalamus
+annotBwas$Zf[annotBwas$ROINb %in% c(10,49)]=annotBwas$Zf[annotBwas$ROINb %in% c(10,49)]-26
+# Caudate
+annotBwas$Yf[annotBwas$ROINb %in% c(11,50)]=annotBwas$Yf[annotBwas$ROINb %in% c(11,50)]+14
+# Accumbens
+annotBwas$Zf[annotBwas$ROINb %in% c(26,58)]=annotBwas$Zf[annotBwas$ROINb %in% c(26,58)]+21
+# Pallidum
+annotBwas$Yf[annotBwas$ROINb %in% c(13,52)]=annotBwas$Yf[annotBwas$ROINb %in% c(13,52)]-24
+
+# Second set of coordinates (outside view)
+annotBwas$Xf2=annotBwas$Xf*(-1)
+annotBwas$Zf2=annotBwas$Zf*(-1)
+annotBwas$Yf2=annotBwas$Yf
+# Caudate
+annotBwas$Yf2[annotBwas$ROINb %in% c(11,50)]=annotBwas$Yf2[annotBwas$ROINb %in% c(11,50)]+8
+# Pallidum
+annotBwas$Yf2[annotBwas$ROINb %in% c(13,52)]=annotBwas$Yf2[annotBwas$ROINb %in% c(13,52)]+6
+# Amygdala
+annotBwas$Yf2[annotBwas$ROINb %in% c(18,54)]=annotBwas$Yf2[annotBwas$ROINb %in% c(18,54)]+3
+# Hippocampus
+annotBwas$Yf2[annotBwas$ROINb %in% c(17,53)]=annotBwas$Yf2[annotBwas$ROINb %in% c(17,53)]+3
+# Accumbens
+annotBwas$Zf2[annotBwas$ROINb %in% c(26,58)]=annotBwas$Zf2[annotBwas$ROINb %in% c(26,58)]+6
+# Thalamus
+annotBwas$Zf2[annotBwas$ROINb %in% c(10,49)]=annotBwas$Zf2[annotBwas$ROINb %in% c(10,49)]+2
+
+}
+
+return(annotBwas)
+
+}
+
+
+
+
+#' Subcortical GIF - translation from grouped subcortical volumes to flat plotting
+#'
+#' This function reads in a brain association map
+#' It produces snapshots of the brain surfaces, with a slight rotation angle, which can be used to make a GIF
+#' The function needs the variance of the phenotype, in order to convert association betas into correlation coefficients.
+#'
+#'
+#' @param inputPath path (folder) to the raw brain association maps
+#' @param bwasFile name of the brain association map
+#' @param variancePheno Variance of the phenotype (used to standardise the effect sizes into correlations)
+#' @param signifThreshold pvalue significance threshold
+#' @param moda modality to plot ("thick" or "LogJacs")
+#' @param hemi hemisphere to plot ("lh" or "rh")
+#' @param nbImagesForGif Number of png images to generate for the gif. The larger the smoother the gif, but the longer it takes to generate.
+#' @param leftOrRightView The side from which the snapshots will be taken
+#' @param outputPath path where the outputs will be written
+#' @param correlationRange range of the correlation coefficients (for improved colors) - default is [-1; 1]
+#' @return Several snapshots of the surfaces.
+#' @import plyr png qqman Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices mvMonitoring
+#' @export
+plotSubcorticalToFlatGIF=function(inputPath, bwasFile, variancePheno, outputPath, hemi, moda, signifThreshold, nbImagesForGif, leftOrRightView, correlationRange=c(-1,1)){
+
+# Open and format
+bwasPlot=vroom( paste0(inputPath, bwasFile ), show_col_types = F)
+bwasPlot=formatBWASsubcortical(BWASsumstat=bwasPlot, hemi=hemi, mod=moda)
+bwasPlot$X=bwasPlot$X*(-1)
+bwasPlot$Y=bwasPlot$Y*(-1)
+
+# Transform betas in correlations (assumes all vertices have been standardised)
+bwasPlot$cor=bwasPlot$b/sqrt(variancePheno)
+
+# Identify significant vertices to plot
+bwasPlot$signifVoxel=ifelse(bwasPlot$p < signifThreshold, 1 ,0)
+
+# Atttribute colors on a diverging palette
+bwasPlot$colorScale <- cut(bwasPlot$cor, breaks = seq(correlationRange[1], correlationRange[2], len = 21),  include.lowest = TRUE)
+
+## Use bin indices, ii, to select color from vector of n-1 equally spaced colors
+cols=c(RColorBrewer::brewer.pal(n = 10, name = "RdYlBu")[10:6],RColorBrewer::brewer.pal(n = 10, name = "RdYlBu")[5:1]) # Select palette colours
+bwasPlot$color <- colorRampPalette(c(cols))(21)[bwasPlot$colorScale] # Make it more continuous
+bwasPlot$color[which(bwasPlot$signifVoxel==0)]="darkgrey"
+bwasPlot$radius=ifelse( bwasPlot$signifVoxel==1, 1.5 ,0.8 )
+
+# Add flat coordinates
+bwasPlot=addFlatCoordinatesSubcortical(annotBwas = bwasPlot, hemi = hemi)
+
+# Produce plots
+if (leftOrRightView=="left"){
+
+for (iii in 0:nbImagesForGif){
+
+plotMax=bwasPlot[,c( "Z",  "X", "Y")]+(bwasPlot[,c( "Zf",  "Xf", "Yf")]-bwasPlot[,c( "Z",  "X", "Y")]) / nbImagesForGif*(iii)
+plotMax=as.data.frame(plotMax)
+bwasPlot$Zplot=plotMax[,1]
+bwasPlot$Xplot=plotMax[,2]
+bwasPlot$Yplot=plotMax[,3]
+
+# Draw plots and save screenshots
+par3d(windowRect = c(0, 0, 800, 800)*1.5, zoom=0.8)
+spheres3d(as.matrix(bwasPlot[,c( "Zplot",  "Xplot", "Yplot")]), col=bwasPlot$color, radius = bwasPlot$radius)
+rgl.snapshot(paste0(outputPath, "/BWAS_", bwasFile, "_", hemi, "_", moda , "_ToFlatGIF", iii, ".png"))
+rgl.close()
+}
+
+} else if (leftOrRightView=="right"){
+
+bwasPlot$X=bwasPlot$X*(-1)
+bwasPlot$Z=bwasPlot$Z*(-1)
+bwasPlot$Y=bwasPlot$Y
+
+for (iii in 0:nbImagesForGif){
+
+plotMax=bwasPlot[,c( "Z",  "X", "Y")]+(bwasPlot[,c( "Zf2",  "Xf2", "Yf2")]-bwasPlot[,c( "Z",  "X", "Y")]) / nbImagesForGif*(iii)
+plotMax=as.data.frame(plotMax)
+bwasPlot$Zplot=plotMax[,1]
+bwasPlot$Xplot=plotMax[,2]
+bwasPlot$Yplot=plotMax[,3]
+
+# Draw plots and save screenshots
+par3d(windowRect = c(0, 0, 800, 800)*1.5, zoom=0.8)
+spheres3d(as.matrix(bwasPlot[,c( "Zplot",  "Xplot", "Yplot")]), col=bwasPlot$color, radius = bwasPlot$radius)
+rgl.snapshot(paste0(outputPath, "/BWAS_", bwasFile, "_", hemi, "_", moda , "_ToFlatGIF_", leftOrRightView, "_view_", iii, ".png"))
+rgl.close()
+
+}
+}
 }
 
 

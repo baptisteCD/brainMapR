@@ -79,8 +79,8 @@ if (moda %in% c("LogJacs", "thick")){ ROIlist=c(10, 11, 12, 13, 17, 18, 26, 49, 
 
 # Loop on the different structures and concatenate results
   for (ROI in ROIlist){
-  print(ROI)
-  if (moda %in% c("LogJacs", "thick")){ bwas1=bwas[which(bwas$LABEL==ROI),] }
+  print(paste0("Looking for clusters in ", ROI))
+  if (moda %in% c("LogJacs", "thick")){ bwas1=bwas[which(bwas$ROINb==ROI),] }
   if (moda %in% c("area", "thickness")){ bwas1=bwas[which(bwas$hemi==ROI),] }
 
   # Find significant clusters
@@ -161,7 +161,7 @@ bwas=rbind(bwasFormattedlh, bwasFormattedrh)
 }
 
 # Run cluster statistic
-res=clusterIdentification(path=outputFolder, bwas = bwas,  moda = moda, signifThreshold = signifThreshold, KNearestNeighbours = 10, phenotypeLabel = bwasFile)
+res=clusterIdentification(outputFolder =outputFolder, bwas = bwas,  moda = moda, signifThreshold = signifThreshold, KNearestNeighbours = 10, phenotypeLabel = bwasFile)
 colnames(res)=paste0(colnames(res), "_", moda)
 resTot=c(resTot, res)
 }
