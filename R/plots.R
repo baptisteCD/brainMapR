@@ -659,6 +659,7 @@ rgl.close()
 
 # Create GIF using magick functions
 ## Open files
+print("Making GIF")
 imgs <- list.files(path = outputPath , pattern = paste0("BWAS_", bwasFile, "_", hemi, "_", moda , "_ToFlatGIF_", leftOrRightView, "_view_"),  full.names = T )
 imgs<-c(imgs[1:length(imgs)], imgs[length(imgs):1])
 
@@ -769,7 +770,7 @@ for (iii in 0:nbImagesForGif){
 # Draw plots and save screenshots
 par3d(windowRect = c(0, 0, 800, 800)*1.5, zoom=0.8)
 spheres3d(as.matrix(bwasPlot[,c( "Zf2",  "Xf2", "Yf2")]), col=bwasPlot$color, radius = bwasPlot$radius)
-rgl.snapshot(paste0(outputPath, "/BWAS_", bwasFile, "_", hemi, "_", moda , "_FlatGIF_", leftOrRightView, "_view_", iii, ".png"))
+rgl.snapshot(paste0(outputPath, "/BWAS_", bwasFile, "_", hemi, "_", moda , "_FlatGIF_", leftOrRightView, "_view_", sprintf(fmt = "%03d", iii), ".png"))
 rgl.close()
 
 # Each structure is rotated
@@ -803,16 +804,20 @@ bwasPlot$Yf2[which(bwasPlot$ROINb==ROI)]=bwasPlot$Yf2[which(bwasPlot$ROINb==ROI)
 
 # Create GIF using magick functions
 ## Open files
+print("Making GIF")
 imgs <- list.files(path = outputPath , pattern = paste0("BWAS_", bwasFile, "_", hemi, "_", moda , "_FlatGIF_", leftOrRightView, "_view_"),  full.names = TRUE )
 img_list <- lapply(imgs, image_read)
 
 ## join the images together
 img_joined <- image_join(img_list)
 
+# Reduce size for gif
+img_joined<-image_scale(img_joined, "x600")
+
 ## animate at 20 frames per second
-img_animated <- image_animate(img_joined, fps = 20)
+img_animated <- image_animate(img_joined, fps = 20, optimize = T)
 ## save to disk
-image_write(image = img_animated, path = paste0(outputPath, "/BWAS_", bwasFile, "_", hemi, "_", moda , "_FlatGIF_", leftOrRightView, "_view", ".gif"))
+image_write(image = img_animated, path = paste0(outputPath, "/BWAS_", bwasFile, "_", hemi, "_", moda , "_FlatGIF_", leftOrRightView, "_view", ".gif") )
 
 }
 
