@@ -193,7 +193,7 @@ dev.off()
 #' @param bwasFile name of the brain association map
 #' @param variancePheno Variance of the phenotype (used to standardise the effect sizes into correlations)
 #' @param signifThreshold pvalue significance threshold used to account for multiple testing
-#' @param correlationRange range of the correlation coefficients (for improved colors) - default is [-1; 1]
+#' @param correlationRange range of the correlation coefficients (for improved colors) - default is (-1; 1)
 #' @param outputPath path where the outputs will be written
 #' @return Outside and Inside snapshots of the surfaces.
 #' @import plyr png qqman Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices
@@ -249,7 +249,7 @@ rgl.close()
 #' @param bwasFile name of the brain association map
 #' @param variancePheno Variance of the phenotype (used to standardise the effect sizes into correlations)
 #' @param signifThreshold pvalue significance threshold used to account for multiple testing
-#' @param correlationRange range of the correlation coefficients (for improved colors) - default is [-1; 1]
+#' @param correlationRange range of the correlation coefficients (for improved colors) - default is (-1; 1)
 #' @param outputPath path where the outputs will be written
 #' @return Outside and Inside snapshots of the surfaces.
 #' @import plyr png qqman Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices vroom
@@ -306,7 +306,7 @@ rgl.close()
 #' @param bwasFile name of the brain association map
 #' @param variancePheno Variance of the phenotype (used to standardise the effect sizes into correlations)
 #' @param signifThreshold pvalue significance threshold used to account for multiple testing
-#' @param correlationRange range of the correlation coefficients (for improved colors) - default is [-1; 1]
+#' @param correlationRange range of the correlation coefficients (for improved colors) - default is (-1; 1)
 #' @param outputPath path where the outputs will be written
 #' @return Outside and Inside snapshots of the surfaces.
 #' @import plyr png qqman Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices vroom
@@ -412,7 +412,7 @@ ggsave(paste0(outputPath, "/Plots_Combined", bwasFile, ".png"),width=18, height=
 #' @param hemi hemisphere to plot ("lh" or "rh")
 #' @param nbImagesForGif Number of png images to generate for the gif. The larger the smoother the gif, but the longer it takes to generate. Please use multiples of 6 if you want the GIF to be created automatically.
 #' @param outputPath path where the outputs will be written. Absolute path may be required to produce GIF.
-#' @param correlationRange range of the correlation coefficients (for improved colors) - default is [-1; 1]
+#' @param correlationRange range of the correlation coefficients (for improved colors) - default is (-1; 1)
 #' @return Several snapshots of the surfaces.
 #' @import plyr png qqman Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices mvMonitoring
 #' @export
@@ -558,7 +558,7 @@ return(annotBwas)
 #' @param nbImagesForGif Number of png images to generate for the gif. The larger the smoother the gif, but the longer it takes to generate.
 #' @param leftOrRightView The side from which the snapshots will be taken
 #' @param outputPath path where the outputs will be written
-#' @param correlationRange range of the correlation coefficients (for improved colors) - default is [-1; 1]
+#' @param correlationRange range of the correlation coefficients (for improved colors) - default is (-1; 1)
 #' @return Several snapshots of the surfaces.
 #' @import plyr png qqman Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices mvMonitoring
 #' @export
@@ -648,7 +648,7 @@ rgl.close()
 #' @param nbImagesForGif Number of png images to generate for the gif. The larger the smoother the gif, but the longer it takes to generate.
 #' @param leftOrRightView The side from which the snapshots will be taken
 #' @param outputPath path where the outputs will be written
-#' @param correlationRange range of the correlation coefficients (for improved colors) - default is [-1; 1]
+#' @param correlationRange range of the correlation coefficients (for improved colors) - default is (-1; 1)
 #' @return Several snapshots of the surfaces.
 #' @import plyr png qqman Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices mvMonitoring
 #' @export
@@ -774,7 +774,7 @@ bwasPlot$Yf2[which(bwasPlot$ROINb==ROI)]=bwasPlot$Yf2[which(bwasPlot$ROINb==ROI)
 #' @param hemi hemisphere to plot ("lh" or "rh")
 #' @param nbImagesForGif Number of png images to generate for the gif. The larger the smoother the gif, but the longer it takes to generate. Please use a multiple of 6 if you want the GIF to be created automatically.
 #' @param outputPath path where the outputs will be written. Absolute path may be required to produce GIF.
-#' @param correlationRange range of the correlation coefficients (for improved colors) - default is [-1; 1]
+#' @param correlationRange range of the correlation coefficients (for improved colors) - default is (-1; 1)
 #' @param faster downsample mesh for faster plotting (e.g. testing)
 #' @return Several snapshots of the rotating cortex and a GIF
 #' @import plyr png qqman Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices mvMonitoring
