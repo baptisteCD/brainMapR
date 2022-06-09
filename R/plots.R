@@ -353,16 +353,44 @@ rgl.close()
 }
 
 
+
+
 #' Combine cortical and subcortical figures to create a multi-panel plot
 #'
-#' This function uses the cortical ans subcortical figures created using the specific functions
+#' This function uses the cortical and subcortical figures created using the specific functions
+#'
+#'
+#' @param outputPath path where the outputs will be written
+#' @param correlationRange range of the correlation coefficients (for improved colors) - default is (-1; 1)
+#' @return The legend bar with manually selected range of effect sizes.
+#' @import RColorBrewer
+#' @export
+createLegendBar=function(outputPath, correlationRange=c(-1,1)){
+cols=c(RColorBrewer::brewer.pal(n = 10, name = "RdYlBu")[10:6],RColorBrewer::brewer.pal(n = 10, name = "RdYlBu")[5:1]) # Select palette colours
+
+png(paste0(outputPath, "/legendbar", correlationRange[1],"_",correlationRange[2], ".png"), width = 5, height = 15, units = "cm", res = 400)
+par(mar=c(2,4,2,2))
+my.colors = colorRampPalette(cols)
+z=matrix(1:100,nrow=1)
+x=1
+y=seq(correlationRange[1],correlationRange[2],len=100)
+image(x,y,z,col=my.colors(20),axes=FALSE,xlab="",ylab="", main="Correlation")
+axis(2)
+dev.off()
+}
+
+
+
+#' Combine cortical and subcortical figures to create a multi-panel plot
+#'
+#' This function uses the cortical and subcortical figures created using the specific functions
 #'
 #'
 #' @param inputPath path (folder) to the cortical and subcortical plots
-#' @param bwasFile Variable name (used to name the clustersAndCoordinates file)
-#' @param pathToLegendBar Path to the manually created legend bar
-#' @param outputPath path where the outputs will be written
-#' @return Outside and Inside snapshots of the surfaces.
+#' @param bwasFile name of bwas file (used in naming of cortical and subcortical plots)
+#' @param pathToLegendBar Path to the legend bar, created with createLegendBar()
+#' @param outputPath folder where the outputs will be written
+#' @return A combined plot with cortical and subcortical surface plots and legendbar
 #' @import plyr png qqman Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices
 #' @export
 combineCorticalSubcorticalPlots=function(inputPath, bwasFile, pathToLegendBar, outputPath){
@@ -370,10 +398,10 @@ combineCorticalSubcorticalPlots=function(inputPath, bwasFile, pathToLegendBar, o
 # List of files
 ll=NULL
 for (moda in c("thickness", "area","thick", "LogJacs") ){
-ll=c(ll, paste0(inputPath, "/BWAS_", bwasFile, "_", "lh", "_", moda, "_clustersAndCoordinates_outside.png"))
-ll=c(ll, paste0(inputPath, "/BWAS_", bwasFile, "_","lh", "_", moda, "_clustersAndCoordinates_inside.png"))
-ll=c(ll, paste0(inputPath, "/BWAS_", bwasFile, "_", "rh", "_", moda, "_clustersAndCoordinates_inside.png"))
-ll=c(ll, paste0(inputPath, "/BWAS_", bwasFile, "_", "rh", "_", moda, "_clustersAndCoordinates_outside.png"))
+ll=c(ll, paste0(inputPath, "/BWAS_", bwasFile, "_", "lh", "_", moda, "_outside.png"))
+ll=c(ll, paste0(inputPath, "/BWAS_", bwasFile, "_","lh", "_", moda, "_inside.png"))
+ll=c(ll, paste0(inputPath, "/BWAS_", bwasFile, "_", "rh", "_", moda, "_inside.png"))
+ll=c(ll, paste0(inputPath, "/BWAS_", bwasFile, "_", "rh", "_", moda, "_outside.png"))
 }
 ll=c(ll, paste0(pathToLegendBar))
 
@@ -400,7 +428,7 @@ ggsave(paste0(outputPath, "/Plots_Combined", bwasFile, ".png"),width=18, height=
 #' Subcortical GIF
 #'
 #' This function reads in a brain association map.
-#' It produces snapshots of the brain surfaces, with a slight rotation angle, which can be used to make a GIF
+#' It produces snapshots of the brain surfaces, with a slight rotation angle, as well as GIF
 #' The function needs the variance of the phenotype, in order to convert association betas into correlation coefficients.
 #'
 #'
@@ -602,7 +630,7 @@ bwasPlot$Yplot=plotMax[,3]
 # Draw plots and save screenshots
 par3d(windowRect = c(0, 0, 800, 800)*1.5, zoom=0.8)
 spheres3d(as.matrix(bwasPlot[,c( "Zplot",  "Xplot", "Yplot")]), col=bwasPlot$color, radius = bwasPlot$radius)
-rgl.snapshot(paste0(outputPath, "/BWAS_", bwasFile, "_", hemi, "_", moda , "_ToFlatGIF", iii, ".png"))
+rgl.snapshot(paste0(outputPath, "/BWAS_", bwasFile, "_", hemi, "_", moda , "_ToFlatGIF", sprintf(fmt = "%03d", iii), ".png"))
 rgl.close()
 }
 
@@ -623,11 +651,25 @@ bwasPlot$Yplot=plotMax[,3]
 # Draw plots and save screenshots
 par3d(windowRect = c(0, 0, 800, 800)*1.5, zoom=0.8)
 spheres3d(as.matrix(bwasPlot[,c( "Zplot",  "Xplot", "Yplot")]), col=bwasPlot$color, radius = bwasPlot$radius)
-rgl.snapshot(paste0(outputPath, "/BWAS_", bwasFile, "_", hemi, "_", moda , "_ToFlatGIF_", leftOrRightView, "_view_", iii, ".png"))
+rgl.snapshot(paste0(outputPath, "/BWAS_", bwasFile, "_", hemi, "_", moda , "_ToFlatGIF_", leftOrRightView, "_view_",  sprintf(fmt = "%03d", iii), ".png"))
 rgl.close()
 
 }
 }
+
+# Create GIF using magick functions
+## Open files
+imgs <- list.files(path = outputPath , pattern = paste0("/BWAS_", bwasFile, "_", hemi, "_", moda , "_ToFlatGIF_", leftOrRightView, "_view_"),  full.names = TRUE )
+img_list <- lapply(imgs, image_read)
+
+## join the images together
+img_joined <- image_join(img_list)
+
+## animate at 20 frames per second
+img_animated <- image_animate(img_joined, fps = 20)
+## save to disk
+image_write(image = img_animated, path = paste0(outputPath, "/BWAS_", bwasFile, "_", hemi, "_", moda , "_ToFlatGIF_", leftOrRightView, "_view", ".gif"))
+
 }
 
 
@@ -686,7 +728,7 @@ for (iii in 0:nbImagesForGif){
 # Draw plots and save screenshots
 par3d(windowRect = c(0, 0, 800, 800)*1.5, zoom=0.8)
 spheres3d(as.matrix(bwasPlot[,c( "Zf",  "Xf", "Yf")]), col=bwasPlot$color, radius = bwasPlot$radius)
-rgl.snapshot(paste0(outputPath, "/BWAS_", bwasFile, "_", hemi, "_", moda , "_FlatGIF_", leftOrRightView, "_view_", iii, ".png"))
+rgl.snapshot(paste0(outputPath, "/BWAS_", bwasFile, "_", hemi, "_", moda , "_FlatGIF_", leftOrRightView, "_view_", sprintf(fmt = "%03d", iii), ".png"))
 rgl.close()
 
 # Each structure is rotated
@@ -756,6 +798,20 @@ bwasPlot$Yf2[which(bwasPlot$ROINb==ROI)]=bwasPlot$Yf2[which(bwasPlot$ROINb==ROI)
 } }
 
 }
+
+# Create GIF using magick functions
+## Open files
+imgs <- list.files(path = outputPath , pattern = paste0("BWAS_", bwasFile, "_", hemi, "_", moda , "_FlatGIF_", leftOrRightView, "_view_"),  full.names = TRUE )
+img_list <- lapply(imgs, image_read)
+
+## join the images together
+img_joined <- image_join(img_list)
+
+## animate at 20 frames per second
+img_animated <- image_animate(img_joined, fps = 20)
+## save to disk
+image_write(image = img_animated, path = paste0("BWAS_", bwasFile, "_", hemi, "_", moda , "_FlatGIF_", leftOrRightView, "_view", ".gif"))
+
 }
 
 
