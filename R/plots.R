@@ -588,7 +588,7 @@ return(annotBwas)
 #' @param outputPath path where the outputs will be written
 #' @param correlationRange range of the correlation coefficients (for improved colors) - default is (-1; 1)
 #' @return Several snapshots of the surfaces.
-#' @import plyr png qqman Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices mvMonitoring
+#' @import plyr png qqman Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices mvMonitoring magick
 #' @export
 plotSubcorticalToFlatGIF=function(inputPath, bwasFile, variancePheno, outputPath, hemi, moda, signifThreshold, nbImagesForGif, leftOrRightView, correlationRange=c(-1,1)){
 
@@ -692,7 +692,7 @@ image_write(image = img_animated, path = paste0(outputPath, "/BWAS_", bwasFile, 
 #' @param outputPath path where the outputs will be written
 #' @param correlationRange range of the correlation coefficients (for improved colors) - default is (-1; 1)
 #' @return Several snapshots of the surfaces.
-#' @import plyr png qqman Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices mvMonitoring
+#' @import plyr png qqman Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices mvMonitoring magick
 #' @export
 plotSubcortical_FlatGIF=function(inputPath, bwasFile, variancePheno, outputPath, hemi, moda, signifThreshold, nbImagesForGif, leftOrRightView, correlationRange=c(-1,1)){
 

@@ -14,15 +14,15 @@ combineCorticalSubcorticalPlots(
 \arguments{
 \item{inputPath}{path (folder) to the cortical and subcortical plots}
 
-\item{bwasFile}{Variable name (used to name the clustersAndCoordinates file)}
+\item{bwasFile}{name of bwas file (used in naming of cortical and subcortical plots)}
 
-\item{pathToLegendBar}{Path to the manually created legend bar}
+\item{pathToLegendBar}{Path to the legend bar, created with createLegendBar()}
 
-\item{outputPath}{path where the outputs will be written}
+\item{outputPath}{folder where the outputs will be written}
 }
 \value{
-Outside and Inside snapshots of the surfaces.
+A combined plot with cortical and subcortical surface plots and legendbar
 }
 \description{
-This function uses the cortical ans subcortical figures created using the specific functions
+This function uses the cortical and subcortical figures created using the specific functions
 }

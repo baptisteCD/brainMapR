@@ -40,6 +40,6 @@ Several snapshots of the surfaces.
 }
 \description{
 This function reads in a brain association map.
-It produces snapshots of the brain surfaces, with a slight rotation angle, which can be used to make a GIF
+It produces snapshots of the brain surfaces, with a slight rotation angle, as well as GIF
 The function needs the variance of the phenotype, in order to convert association betas into correlation coefficients.
 }

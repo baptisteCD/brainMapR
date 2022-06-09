@@ -7,7 +7,7 @@ Authors@R:
            role = c("aut", "cre"),
            email = "baptiste.couvyduchesne@gmail.com",
            comment = c(ORCID = "0000-0002-0719-9302"))
-Description: This package originated from the publication "A parsimonious model for mass-univariate vertex-wise analysis" (Baptiste Couvy-Duchesne, Futao Zhang, Kathryn E. Kemper, Julia Sidorenko, Naomi R. Wray, Peter M. Visscher, Olivier Colliot, Jian Yang). The functions help you open, format, analyse and plot the results from mass-univariate association testing in the cortex and subcortical volumes. We expect the analyses to have been run with OSCA (https://cnsgenomics.com/software/osca/#Overview) using MRI data processed with FreeSurfer (fsaverage for cortical data and ENIGMA-shape subcortical data).
+Description: This package originated from the publication "A parsimonious model for mass-univariate vertex-wise analysis" (Baptiste Couvy-Duchesne, Futao Zhang, Kathryn E. Kemper, Julia Sidorenko, Naomi R. Wray, Peter M. Visscher, Olivier Colliot, Jian Yang). The functions help you open, format, analyse and plot the results from mass-univariate association testing in the cortex and subcortical volumes. We expect the analyses to have been run with OSCA (https://cnsgenomics.com/software/osca/#Overview) using T1w MRI data processed with FreeSurfer (fsaverage for cortical data and ENIGMA-shape for subcortical data).
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
@@ -26,4 +26,5 @@ Depends:
     Morpho,
     ggplot2,
     vroom,
-    mvMonitoring
+    mvMonitoring,
+    magick
