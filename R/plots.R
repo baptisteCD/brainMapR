@@ -812,7 +812,7 @@ img_joined <- image_join(img_list)
 ## animate at 20 frames per second
 img_animated <- image_animate(img_joined, fps = 20)
 ## save to disk
-image_write(image = img_animated, path = paste0(outputPath, "BWAS_", bwasFile, "_", hemi, "_", moda , "_FlatGIF_", leftOrRightView, "_view", ".gif"))
+image_write(image = img_animated, path = paste0(outputPath, "/BWAS_", bwasFile, "_", hemi, "_", moda , "_FlatGIF_", leftOrRightView, "_view", ".gif"))
 
 }
 
