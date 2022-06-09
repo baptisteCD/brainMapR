@@ -410,8 +410,8 @@ ggsave(paste0(outputPath, "/Plots_Combined", bwasFile, ".png"),width=18, height=
 #' @param signifThreshold pvalue significance threshold
 #' @param moda modality to plot ("thick" or "LogJacs")
 #' @param hemi hemisphere to plot ("lh" or "rh")
-#' @param nbImagesForGif Number of png images to generate for the gif. The larger the smoother the gif, but the longer it takes to generate.
-#' @param outputPath path where the outputs will be written
+#' @param nbImagesForGif Number of png images to generate for the gif. The larger the smoother the gif, but the longer it takes to generate. Please use multiples of 6 if you want the GIF to be created automatically.
+#' @param outputPath path where the outputs will be written. Absolute path may be required to produce GIF.
 #' @param correlationRange range of the correlation coefficients (for improved colors) - default is [-1; 1]
 #' @return Several snapshots of the surfaces.
 #' @import plyr png qqman Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices mvMonitoring
@@ -439,19 +439,11 @@ bwasPlot$color <- colorRampPalette(c(cols))(21)[bwasPlot$colorScale] # Make it m
 bwasPlot$color[which(bwasPlot$signifVoxel==0)]="darkgrey"
 bwasPlot$radius=ifelse( bwasPlot$signifVoxel==1, 1.5 ,0.8 )
 
-for (iii in 1:nbImagesForGif){
 # Draw plots and save screenshots
 par3d(windowRect = c(0, 0, 800, 800)*1.5, zoom=0.8)
 spheres3d(as.matrix(bwasPlot[,c( "Z",  "X", "Y")]), col=bwasPlot$color, radius = bwasPlot$radius)
-rgl.snapshot(paste0(outputPath, "/BWAS_", bwasFile, "_", hemi, "_", moda , "_GIF", iii, ".png"))
+movie3d( spin3d(rpm=10), duration = 6, fps = nbImagesForGif/6 , frames = paste0(outputPath, "/BWAS_", bwasFile,"_", hemi, "_", moda , "_GIF_"), dir = outputPath,  convert=NULL, clean=F, movie = paste0(outputPath, "/BWAS_", bwasFile,"_", hemi, "_", moda , "_GIF_") )
 rgl.close()
-
-plotMax=as.matrix(bwasPlot[,c( "Z",  "X", "Y")]) %*% rotateScale3D(rot_angles = c(360/nbImagesForGif,0,0))
-plotMax=as.data.frame(plotMax)
-bwasPlot$Z=plotMax[,1]
-bwasPlot$X=plotMax[,2]
-bwasPlot$Y=plotMax[,3]
-}
 
 }
 
@@ -637,5 +629,191 @@ rgl.close()
 }
 }
 }
+
+
+
+#' Subcortical GIF flat - rotation of each subcortical structure from the flat format
+#'
+#' This function reads in a brain association map
+#' It produces snapshots of the subcortical brain surfaces, with a slight rotation angle, which can be used to make a GIF
+#' The function needs the variance of the phenotype, in order to convert association betas into correlation coefficients.
+#'
+#'
+#' @param inputPath path (folder) to the raw brain association maps
+#' @param bwasFile name of the brain association map
+#' @param variancePheno Variance of the phenotype (used to standardise the effect sizes into correlations)
+#' @param signifThreshold pvalue significance threshold
+#' @param moda modality to plot ("thick" or "LogJacs")
+#' @param hemi hemisphere to plot ("lh" or "rh")
+#' @param nbImagesForGif Number of png images to generate for the gif. The larger the smoother the gif, but the longer it takes to generate.
+#' @param leftOrRightView The side from which the snapshots will be taken
+#' @param outputPath path where the outputs will be written
+#' @param correlationRange range of the correlation coefficients (for improved colors) - default is [-1; 1]
+#' @return Several snapshots of the surfaces.
+#' @import plyr png qqman Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices mvMonitoring
+#' @export
+plotSubcortical_FlatGIF=function(inputPath, bwasFile, variancePheno, outputPath, hemi, moda, signifThreshold, nbImagesForGif, leftOrRightView, correlationRange=c(-1,1)){
+
+# Open and format
+bwasPlot=vroom( paste0(inputPath, bwasFile ), show_col_types = F)
+bwasPlot=formatBWASsubcortical(BWASsumstat=bwasPlot, hemi=hemi, mod=moda)
+bwasPlot$X=bwasPlot$X*(-1)
+bwasPlot$Y=bwasPlot$Y*(-1)
+
+# Transform betas in correlations (assumes all vertices have been standardised)
+bwasPlot$cor=bwasPlot$b/sqrt(variancePheno)
+
+# Identify significant vertices to plot
+bwasPlot$signifVoxel=ifelse(bwasPlot$p < signifThreshold, 1 ,0)
+
+# Atttribute colors on a diverging palette
+bwasPlot$colorScale <- cut(bwasPlot$cor, breaks = seq(correlationRange[1], correlationRange[2], len = 21),  include.lowest = TRUE)
+
+## Use bin indices, ii, to select color from vector of n-1 equally spaced colors
+cols=c(RColorBrewer::brewer.pal(n = 10, name = "RdYlBu")[10:6],RColorBrewer::brewer.pal(n = 10, name = "RdYlBu")[5:1]) # Select palette colours
+bwasPlot$color <- colorRampPalette(c(cols))(21)[bwasPlot$colorScale] # Make it more continuous
+bwasPlot$color[which(bwasPlot$signifVoxel==0)]="darkgrey"
+bwasPlot$radius=ifelse( bwasPlot$signifVoxel==1, 1.5 ,0.8 )
+
+# Add flat coordinates
+bwasPlot=addFlatCoordinatesSubcortical(annotBwas = bwasPlot, hemi = hemi)
+
+# Produce plots
+if (leftOrRightView=="left"){
+
+for (iii in 0:nbImagesForGif){
+
+# Draw plots and save screenshots
+par3d(windowRect = c(0, 0, 800, 800)*1.5, zoom=0.8)
+spheres3d(as.matrix(bwasPlot[,c( "Zf",  "Xf", "Yf")]), col=bwasPlot$color, radius = bwasPlot$radius)
+rgl.snapshot(paste0(outputPath, "/BWAS_", bwasFile, "_", hemi, "_", moda , "_FlatGIF_", leftOrRightView, "_view_", iii, ".png"))
+rgl.close()
+
+# Each structure is rotated
+
+# First translation to align the rotation axis with origin
+for (ROI in unique(bwasPlot$ROINb)){
+
+    # Get coordinates of barycentre
+coordBar=c(min(bwasPlot$Zf[which(bwasPlot$ROINb==ROI)]) + (max(bwasPlot$Zf[which(bwasPlot$ROINb==ROI)])-min(bwasPlot$Zf[which(bwasPlot$ROINb==ROI)]))/2, min(bwasPlot$Xf[which(bwasPlot$ROINb==ROI)]) + (max(bwasPlot$Xf[which(bwasPlot$ROINb==ROI)])-min(bwasPlot$Xf[which(bwasPlot$ROINb==ROI)]))/2 , min(bwasPlot$Yf[which(bwasPlot$ROINb==ROI)])+ (max(bwasPlot$Yf[which(bwasPlot$ROINb==ROI)])-min(bwasPlot$Yf[which(bwasPlot$ROINb==ROI)]))/2 )
+
+# Translate shape
+bwasPlot$Zf[which(bwasPlot$ROINb==ROI)]=bwasPlot$Zf[which(bwasPlot$ROINb==ROI)]-coordBar[1]
+bwasPlot$Xf[which(bwasPlot$ROINb==ROI)]=bwasPlot$Xf[which(bwasPlot$ROINb==ROI)]-coordBar[2]
+bwasPlot$Yf[which(bwasPlot$ROINb==ROI)]=bwasPlot$Yf[which(bwasPlot$ROINb==ROI)]-coordBar[3]
+
+# Rotation
+plotMax=as.matrix(bwasPlot[which(bwasPlot$ROINb==ROI),c( "Zf",  "Xf", "Yf")]) %*% rotateScale3D(rot_angles = c(360/nbImagesForGif,0,0))
+plotMax=as.data.frame(plotMax)
+bwasPlot$Zf[which(bwasPlot$ROINb==ROI)]=plotMax[,1]
+bwasPlot$Xf[which(bwasPlot$ROINb==ROI)]=plotMax[,2]
+bwasPlot$Yf[which(bwasPlot$ROINb==ROI)]=plotMax[,3]
+
+# Back translation
+bwasPlot$Zf[which(bwasPlot$ROINb==ROI)]=bwasPlot$Zf[which(bwasPlot$ROINb==ROI)]+coordBar[1]
+bwasPlot$Xf[which(bwasPlot$ROINb==ROI)]=bwasPlot$Xf[which(bwasPlot$ROINb==ROI)]+coordBar[2]
+bwasPlot$Yf[which(bwasPlot$ROINb==ROI)]=bwasPlot$Yf[which(bwasPlot$ROINb==ROI)]+coordBar[3]
+
+} } } else if (leftOrRightView=="right"){
+
+bwasPlot$X=bwasPlot$X*(-1)
+bwasPlot$Z=bwasPlot$Z*(-1)
+bwasPlot$Y=bwasPlot$Y
+
+for (iii in 0:nbImagesForGif){
+
+# Draw plots and save screenshots
+par3d(windowRect = c(0, 0, 800, 800)*1.5, zoom=0.8)
+spheres3d(as.matrix(bwasPlot[,c( "Zf2",  "Xf2", "Yf2")]), col=bwasPlot$color, radius = bwasPlot$radius)
+rgl.snapshot(paste0(outputPath, "/BWAS_", bwasFile, "_", hemi, "_", moda , "_FlatGIF_", leftOrRightView, "_view_", iii, ".png"))
+rgl.close()
+
+# Each structure is rotated
+
+# First translation to align the rotation axis with origin
+for (ROI in unique(bwasPlot$ROINb)){
+
+    # Get coordinates of barycentre
+coordBar=c(min(bwasPlot$Zf2[which(bwasPlot$ROINb==ROI)]) + (max(bwasPlot$Zf2[which(bwasPlot$ROINb==ROI)])-min(bwasPlot$Zf2[which(bwasPlot$ROINb==ROI)]))/2, min(bwasPlot$Xf2[which(bwasPlot$ROINb==ROI)]) + (max(bwasPlot$Xf2[which(bwasPlot$ROINb==ROI)])-min(bwasPlot$Xf2[which(bwasPlot$ROINb==ROI)]))/2 , min(bwasPlot$Yf2[which(bwasPlot$ROINb==ROI)])+ (max(bwasPlot$Yf2[which(bwasPlot$ROINb==ROI)])-min(bwasPlot$Yf2[which(bwasPlot$ROINb==ROI)]))/2 )
+
+# Translate shape
+bwasPlot$Zf2[which(bwasPlot$ROINb==ROI)]=bwasPlot$Zf2[which(bwasPlot$ROINb==ROI)]-coordBar[1]
+bwasPlot$Xf2[which(bwasPlot$ROINb==ROI)]=bwasPlot$Xf2[which(bwasPlot$ROINb==ROI)]-coordBar[2]
+bwasPlot$Yf2[which(bwasPlot$ROINb==ROI)]=bwasPlot$Yf2[which(bwasPlot$ROINb==ROI)]-coordBar[3]
+
+# Rotation
+plotMax=as.matrix(bwasPlot[which(bwasPlot$ROINb==ROI),c( "Zf2",  "Xf2", "Yf2")]) %*% rotateScale3D(rot_angles = c(360/nbImagesForGif,0,0))
+plotMax=as.data.frame(plotMax)
+
+bwasPlot$Zf2[which(bwasPlot$ROINb==ROI)]=plotMax[,1]
+bwasPlot$Xf2[which(bwasPlot$ROINb==ROI)]=plotMax[,2]
+bwasPlot$Yf2[which(bwasPlot$ROINb==ROI)]=plotMax[,3]
+
+# Back translation
+bwasPlot$Zf2[which(bwasPlot$ROINb==ROI)]=bwasPlot$Zf2[which(bwasPlot$ROINb==ROI)]+coordBar[1]
+bwasPlot$Xf2[which(bwasPlot$ROINb==ROI)]=bwasPlot$Xf2[which(bwasPlot$ROINb==ROI)]+coordBar[2]
+bwasPlot$Yf2[which(bwasPlot$ROINb==ROI)]=bwasPlot$Yf2[which(bwasPlot$ROINb==ROI)]+coordBar[3]
+} }
+
+}
+}
+
+
+#' Cortical brain plots for GIF
+#'
+#' This function reads in a brain association map.
+#' It produces snapshots of the brain surfaces.
+#' The function needs the variance of the phenotype, in order to convert association betas into correlation coefficients.
+#'
+#'
+#' @param inputPath path (folder) to the raw brain association maps
+#' @param bwasFile name of the brain association map
+#' @param variancePheno Variance of the phenotype (used to standardise the effect sizes into correlations)
+#' @param signifThreshold pvalue significance threshold
+#' @param moda modality to plot ("thickness" or "area")
+#' @param hemi hemisphere to plot ("lh" or "rh")
+#' @param nbImagesForGif Number of png images to generate for the gif. The larger the smoother the gif, but the longer it takes to generate. Please use a multiple of 6 if you want the GIF to be created automatically.
+#' @param outputPath path where the outputs will be written. Absolute path may be required to produce GIF.
+#' @param correlationRange range of the correlation coefficients (for improved colors) - default is [-1; 1]
+#' @param faster downsample mesh for faster plotting (e.g. testing)
+#' @return Several snapshots of the rotating cortex and a GIF
+#' @import plyr png qqman Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices mvMonitoring
+#' @export
+plotCorticalGIF=function(inputPath, bwasFile, variancePheno, signifThreshold, moda, hemi,  outputPath, nbImagesForGif, correlationRange=c(-1,1), faster){
+
+# Open files and annotate
+bwasPlot=vroom(paste0(inputPath, bwasFile ) , show_col_types = F)
+bwasPlot=formatBWAScortical(BWASsumstat = bwasPlot, hemi = hemi, mod = moda)
+
+# Transform betas in correlations
+bwasPlot$cor=bwasPlot$b/sqrt(variancePheno)
+
+# Identify significant vertices to plot
+bwasPlot$signifVoxel=ifelse(bwasPlot$p < signifThreshold, 1 ,0)
+
+# Atttribute colors on a diverging palette
+bwasPlot$colorScale <- cut(bwasPlot$cor, breaks = seq(correlationRange[1], correlationRange[2], len = 21),  include.lowest = TRUE)
+
+## Use bin indices, ii, to select color from vector of n-1 equally spaced colors
+cols=c(RColorBrewer::brewer.pal(n = 10, name = "RdYlBu")[10:6], RColorBrewer::brewer.pal(n = 10, name = "RdYlBu")[5:1]) # Select palette colours
+bwasPlot$color <- colorRampPalette(c(cols))(21)[bwasPlot$colorScale] # Make it more continuous
+bwasPlot$color[which(bwasPlot$signifVoxel==0)]="darkgrey"
+bwasPlot$radius=ifelse(bwasPlot$signifVoxel==1, 2, 0.8)
+
+if (faster==T){
+set.seed(8)
+exctr=sample(x = 1:dim(bwasPlot)[1], size = dim(bwasPlot)[1]/4, replace = F)
+bwasPlot=bwasPlot[exctr,]
+}
+
+# Add max - min points to set camera
+# Add max points to fix camera
+par3d(windowRect = c(0, 0, 800, 800)*1.5, zoom=0.8)
+spheres3d(as.matrix(bwasPlot[,c( "Y","X", "Z")]), col=bwasPlot$color, radius = bwasPlot$radius )
+movie3d( spin3d(rpm=10), duration = 6, fps = nbImagesForGif/6 , frames = paste0(outputPath, "/BWAS_", bwasFile,"_", hemi, "_", moda , "_GIF_"), dir = outputPath,  convert=NULL, clean=F, movie = paste0(outputPath, "/BWAS_", bwasFile,"_", hemi, "_", moda , "_GIF_") )
+rgl.close()
+
+}
+
 
 
