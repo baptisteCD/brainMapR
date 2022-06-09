@@ -225,14 +225,14 @@ bwasPlot$radius=ifelse(  bwasPlot$signifVoxel==1, 1.5 ,0.8 )
 # Draw plots and save screenshots
 par3d(windowRect = c(0, 0, 800, 800)*1.5, zoom=0.8)
 spheres3d(as.matrix(bwasPlot[,c( "Z",  "X", "Y")]), col=bwasPlot$color, radius = bwasPlot$radius)
-rgl.snapshot(paste0(outputPath, "/BWAS_", bwasFile, "_", hemi, "_", moda , "_inside.png"))
+rgl.snapshot(paste0(outputPath, "/BWAS_", bwasFile, "_", hemi, "_", moda , "_inside_bundled.png"))
 rgl.close()
 
 bwasPlot$X=bwasPlot$X*(-1)
 bwasPlot$Z=bwasPlot$Z*(-1)
 par3d(windowRect = c(0, 0, 800, 800)*1.5, zoom=0.8)
 spheres3d(as.matrix(bwasPlot[,c( "Z",  "X", "Y")]), col=bwasPlot$color, radius = bwasPlot$radius)
-rgl.snapshot(paste0(outputPath, "/BWAS_", bwasFile,"_", hemi, "_", moda , "_outside.png"))
+rgl.snapshot(paste0(outputPath, "/BWAS_", bwasFile,"_", hemi, "_", moda , "_outside_bundled.png"))
 rgl.close()
 
 }}
@@ -284,12 +284,12 @@ bwasPlot=addFlatCoordinatesSubcortical(annotBwas = bwasPlot, hemi = hemi)
 # Draw plots and save screenshots
 par3d(windowRect = c(0, 0, 800, 800)*1.5, zoom=0.8)
 spheres3d(as.matrix(bwasPlot[,c( "Zf",  "Xf", "Yf")]), col=bwasPlot$color, radius = bwasPlot$radius)
-rgl.snapshot(paste0(outputPath, "/BWAS_", bwasFile, "_", hemi, "_", moda , "_clustersAndCoordinates_inside.png"))
+rgl.snapshot(paste0(outputPath, "/BWAS_", bwasFile, "_", hemi, "_", moda , "_inside.png"))
 rgl.close()
 
 par3d(windowRect = c(0, 0, 800, 800)*1.5, zoom=0.8)
 spheres3d(as.matrix(bwasPlot[,c( "Zf2",  "Xf2", "Yf2")]), col=bwasPlot$color, radius = bwasPlot$radius)
-rgl.snapshot(paste0(outputPath, "/BWAS_", bwasFile,"_", hemi, "_", moda , "_clustersAndCoordinates_outside.png"))
+rgl.snapshot(paste0(outputPath, "/BWAS_", bwasFile,"_", hemi, "_", moda , "_outside.png"))
 rgl.close()
 
 }}
