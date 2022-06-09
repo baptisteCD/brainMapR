@@ -630,7 +630,7 @@ bwasPlot$Yplot=plotMax[,3]
 # Draw plots and save screenshots
 par3d(windowRect = c(0, 0, 800, 800)*1.5, zoom=0.8)
 spheres3d(as.matrix(bwasPlot[,c( "Zplot",  "Xplot", "Yplot")]), col=bwasPlot$color, radius = bwasPlot$radius)
-rgl.snapshot(paste0(outputPath, "/BWAS_", bwasFile, "_", hemi, "_", moda , "_ToFlatGIF", sprintf(fmt = "%03d", iii), ".png"))
+rgl.snapshot(paste0(outputPath, "/BWAS_", bwasFile, "_", hemi, "_", moda , "_ToFlatGIF_", leftOrRightView, "_view_",  sprintf(fmt = "%03d", iii), ".png"))
 rgl.close()
 }
 
@@ -659,7 +659,9 @@ rgl.close()
 
 # Create GIF using magick functions
 ## Open files
-imgs <- list.files(path = outputPath , pattern = paste0("/BWAS_", bwasFile, "_", hemi, "_", moda , "_ToFlatGIF_", leftOrRightView, "_view_"),  full.names = TRUE )
+imgs <- list.files(path = outputPath , pattern = paste0("BWAS_", bwasFile, "_", hemi, "_", moda , "_ToFlatGIF_", leftOrRightView, "_view_"),  full.names = T )
+imgs<-c(imgs[1:length(imgs)], imgs[length(imgs):1])
+
 img_list <- lapply(imgs, image_read)
 
 ## join the images together
@@ -810,7 +812,7 @@ img_joined <- image_join(img_list)
 ## animate at 20 frames per second
 img_animated <- image_animate(img_joined, fps = 20)
 ## save to disk
-image_write(image = img_animated, path = paste0("BWAS_", bwasFile, "_", hemi, "_", moda , "_FlatGIF_", leftOrRightView, "_view", ".gif"))
+image_write(image = img_animated, path = paste0(outputPath, "BWAS_", bwasFile, "_", hemi, "_", moda , "_FlatGIF_", leftOrRightView, "_view", ".gif"))
 
 }
 
