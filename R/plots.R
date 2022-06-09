@@ -470,7 +470,7 @@ bwasPlot$radius=ifelse( bwasPlot$signifVoxel==1, 1.5 ,0.8 )
 # Draw plots and save screenshots
 par3d(windowRect = c(0, 0, 800, 800)*1.5, zoom=0.8)
 spheres3d(as.matrix(bwasPlot[,c( "Z",  "X", "Y")]), col=bwasPlot$color, radius = bwasPlot$radius)
-movie3d( spin3d(rpm=10), duration = 6, fps = nbImagesForGif/6 , frames = paste0(outputPath, "/BWAS_", bwasFile,"_", hemi, "_", moda , "_GIF_"), dir = outputPath,  convert=NULL, clean=F, movie = paste0(outputPath, "/BWAS_", bwasFile,"_", hemi, "_", moda , "_GIF_") )
+movie3d( spin3d(rpm=10), duration = 6, fps = nbImagesForGif/6 , frames = paste0(outputPath, "/BWAS_", bwasFile,"_", hemi, "_", moda , "_GIF_"), dir = outputPath,  convert=NULL, clean=F, movie = paste0(outputPath, "/BWAS_", bwasFile,"_", hemi, "_", moda , "_GIF") )
 rgl.close()
 
 }
@@ -873,7 +873,7 @@ bwasPlot=bwasPlot[exctr,]
 # Add max points to fix camera
 par3d(windowRect = c(0, 0, 800, 800)*1.5, zoom=0.8)
 spheres3d(as.matrix(bwasPlot[,c( "Y","X", "Z")]), col=bwasPlot$color, radius = bwasPlot$radius )
-movie3d( spin3d(rpm=10), duration = 6, fps = nbImagesForGif/6 , frames = paste0(outputPath, "/BWAS_", bwasFile,"_", hemi, "_", moda , "_GIF_"), dir = outputPath,  convert=NULL, clean=F, movie = paste0(outputPath, "/BWAS_", bwasFile,"_", hemi, "_", moda , "_GIF_") )
+movie3d( spin3d(rpm=10), duration = 6, fps = nbImagesForGif/6 , frames = paste0(outputPath, "/BWAS_", bwasFile,"_", hemi, "_", moda , "_GIF_"), dir = outputPath,  convert=NULL, clean=F, movie = paste0(outputPath, "/BWAS_", bwasFile,"_", hemi, "_", moda , "_GIF") )
 rgl.close()
 
 }
