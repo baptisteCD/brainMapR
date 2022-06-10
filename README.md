@@ -2,9 +2,13 @@
  
 <br>
 
+Left cortical thickness (regions associated with age)
+
 ![Alt Text](https://github.com/baptisteCD/brainMapR/blob/main/lh_thickness.gif)
 
 <br><br>
+
+Left subcortical thickness (regions associated with age)
 
 ![Alt Text](https://github.com/baptisteCD/brainMapR/blob/main/lh_thick_combined.gif)
 
