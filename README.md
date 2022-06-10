@@ -1,7 +1,6 @@
 # brainMapR - an R package to analyse and visualise brain association maps
  
 <br>
-<br>
 
 ![Cortical plots and GIF](https://github.com/baptisteCD/brainMapR/lh_thickness.gif)
 
@@ -10,7 +9,7 @@
 
 --> See code example and usage [**here**](https://baptistecd.github.io/Brain-Mapping-LMM/RR_9_Extractresults_RealPhenotypes.html).
 
-<br>
+<br><br>
 Overview
 --------
 
@@ -23,7 +22,7 @@ This package accompanies two publications:
 
 [Parsimonious model for mass-univariate vertexwise analysis](https://doi.org/10.1117/1.JMI.9.5.052404)
  
-<br>
+<br><br>
 Getting started   
 -------- 
 
