@@ -14,7 +14,7 @@
 significantClusterAroundVertex=function(bwas, signifThreshold, targetVertex, nbNearestNeighbours ){
 
   if (bwas$p[which(bwas$Probe == targetVertex)]> signifThreshold){
-  print(paste("Vertex", targetVertex, "located in", bwas$LABELNAME[which(bwas$Probe==targetVertex)], "not significant" ))
+  print(paste("Vertex", targetVertex, "located in", bwas$ROIlabel[which(bwas$Probe==targetVertex)], "not significant" ))
   } else {
 
 bwas$voxelStatus="nonSignificant"
@@ -44,7 +44,7 @@ sizeCluster=length(which(bwas$voxelStatus=="belongInCluster"))
 }
 
 bwas[,paste0("cluster_", targetVertex)]=ifelse(bwas$voxelStatus %in% c("belongInCluster", "truePositive"), 1 , 0 )
-print(paste("Found ", sum(bwas[,paste0("cluster_", targetVertex)]),"significant vertices in cluster including ", targetVertex, "located in", bwas$LABELNAME[which(bwas$Probe==targetVertex)] ))
+print(paste("Found ", sum(bwas[,paste0("cluster_", targetVertex)]),"significant vertices in cluster including ", targetVertex, "located in", bwas$ROIlabel[which(bwas$Probe==targetVertex)] ))
 bwas$voxelStatus=NULL
 
 }
