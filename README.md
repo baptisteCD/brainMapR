@@ -2,9 +2,11 @@
  
 <br>
 
-![Alt Text](https://github.com/baptisteCD/brainMapR/lh_thickness.gif)
+![Alt Text](https://github.com/baptisteCD/brainMapR/blob/main/lh_thickness.gif)
 
-![Alt Text](https://github.com/baptisteCD/brainMapR/lh_thick_combined.gif)
+<br><br>
+
+![Alt Text](https://github.com/baptisteCD/brainMapR/blob/main/lh_thick_combined.gif)
 
 
 --> See code example and usage [**here**](https://baptistecd.github.io/Brain-Mapping-LMM/RR_9_Extractresults_RealPhenotypes.html).
