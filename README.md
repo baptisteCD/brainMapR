@@ -2,9 +2,9 @@
  
 <br>
 
-![Cortical plots and GIF](https://github.com/baptisteCD/brainMapR/lh_thickness.gif)
+![Alt Text](https://github.com/baptisteCD/brainMapR/lh_thickness.gif)
 
-![Subcortical plots and GIF](https://github.com/baptisteCD/brainMapR/lh_thick_combined.gif)
+![Alt Text](https://github.com/baptisteCD/brainMapR/lh_thick_combined.gif)
 
 
 --> See code example and usage [**here**](https://baptistecd.github.io/Brain-Mapping-LMM/RR_9_Extractresults_RealPhenotypes.html).
