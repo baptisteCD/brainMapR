@@ -134,6 +134,7 @@ write.csv(BWASsignif[which(BWASsignif$log10p > signifLog10),], paste0(outputPath
 # Produce QQplot
 if (qqPlot==T){
     png(paste0(outputPath, "QQplot_", bwasFile, ".png"), width = 10, height = 10, units = "cm", res = 400, type="cairo")
+    par(mar=c(5,5,2,0.5))
     qqplot(pvector = BWASsumstat$p )
     dev.off()
 }
