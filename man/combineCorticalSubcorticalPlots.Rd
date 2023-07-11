@@ -8,7 +8,8 @@ combineCorticalSubcorticalPlots(
   inputPath,
   bwasFile,
   pathToLegendBar,
-  outputPath
+  outputPath,
+  style = "smoothwm"
 )
 }
 \arguments{
@@ -19,6 +20,8 @@ combineCorticalSubcorticalPlots(
 \item{pathToLegendBar}{Path to the legend bar, created with createLegendBar()}
 
 \item{outputPath}{folder where the outputs will be written}
+
+\item{style}{style for plotting (based on the different cortical fsaverage surface). Possible options: "orig", "pial", "sphere", "inflated",  "inflated_pre",  "pial_semi_inflated",  "smoothwm" (default)}
 }
 \value{
 A combined plot with cortical and subcortical surface plots and legendbar

@@ -10,7 +10,8 @@ plotCortical(
   variancePheno,
   signifThreshold,
   outputPath,
-  correlationRange = c(-1, 1)
+  correlationRange = c(-1, 1),
+  style = "smoothwm"
 )
 }
 \arguments{
@@ -25,6 +26,8 @@ plotCortical(
 \item{outputPath}{path where the outputs will be written}
 
 \item{correlationRange}{range of the correlation coefficients (for improved colors) - default is (-1; 1)}
+
+\item{style}{style for plotting (based on the different cortical fsaverage surface). Possible options: "orig", "pial", "sphere", "inflated",  "inflated_pre",  "pial_semi_inflated",  "smoothwm" (default)}
 }
 \value{
 Outside and Inside snapshots of the surfaces.

@@ -4,12 +4,18 @@
 \alias{createLegendBar}
 \title{Combine cortical and subcortical figures to create a multi-panel plot}
 \usage{
-createLegendBar(outputPath, correlationRange = c(-1, 1))
+createLegendBar(
+  outputPath,
+  correlationRange = c(-1, 1),
+  statisticsName = "Correlation"
+)
 }
 \arguments{
 \item{outputPath}{path where the outputs will be written}
 
 \item{correlationRange}{range of the correlation coefficients (for improved colors) - default is (-1; 1)}
+
+\item{statisticsName}{name of the statistics, which is to appear on top of the legend (default is "Correlation")}
 }
 \value{
 The legend bar with manually selected range of effect sizes.

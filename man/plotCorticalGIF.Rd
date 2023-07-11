@@ -14,7 +14,8 @@ plotCorticalGIF(
   outputPath,
   nbImagesForGif,
   correlationRange = c(-1, 1),
-  faster
+  faster,
+  style
 )
 }
 \arguments{
@@ -37,6 +38,8 @@ plotCorticalGIF(
 \item{correlationRange}{range of the correlation coefficients (for improved colors) - default is (-1; 1)}
 
 \item{faster}{downsample mesh for faster plotting (e.g. testing)}
+
+\item{style}{style for plotting (based on the different cortical fsaverage surface). Possible options: "orig", "pial", "sphere", "inflated",  "inflated_pre",  "pial_semi_inflated",  "smoothwm" (default)}
 }
 \value{
 Several snapshots of the rotating cortex and a GIF
