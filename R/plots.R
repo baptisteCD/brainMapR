@@ -71,7 +71,7 @@ BWASsumstat<-formatBWASsubcortical(BWASsumstat = BWASsumstatfile , hemi = hemi, 
 }
 
 # Get all chi2 value
-BWASsumstat$CHI2=(BWASsumstat$b/BWASsumstat$se)**2
+BWASsumstat$CHI2=(BWASsumstatfile$b/BWASsumstatfile$se)**2
 
 # Set colors for Manhattan plot
 laab<-unique(BWASsumstat$ROINb)
@@ -309,10 +309,11 @@ rgl.close()
 #' @param signifThreshold pvalue significance threshold used to account for multiple testing
 #' @param correlationRange range of the correlation coefficients (for improved colors) - default is (-1; 1)
 #' @param outputPath path where the outputs will be written
+#' @param style style for plotting (based on the different cortical fsaverage surface). Possible options: "orig", "pial", "sphere", "inflated",  "inflated_pre",  "pial_semi_inflated",  "smoothwm" (default)
 #' @return Outside and Inside snapshots of the surfaces.
 #' @import plyr png qqman Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices vroom
 #' @export
-plotCortical=function(inputPath, bwasFile, variancePheno, signifThreshold, outputPath, correlationRange=c(-1,1)
+plotCortical=function(inputPath, bwasFile, variancePheno, signifThreshold, outputPath, correlationRange=c(-1,1), style="smoothwm"
 ){
 
  for (moda in c("area", "thickness")){
@@ -339,22 +340,41 @@ bwasPlot$radius=ifelse(bwasPlot$signifVoxel==1, 2, 0.8)
 
 # Draw plot
 par3d(windowRect = c(0, 0, 800, 800)*1.5, zoom=0.8)
-spheres3d(as.matrix(bwasPlot[,c( "Y","X", "Z")]), col=bwasPlot$color, radius = bwasPlot$radius)
-rgl.snapshot(paste0(outputPath, "/BWAS_", bwasFile,"_", hemi, "_", moda , "_inside.png"))
+spheres3d(as.matrix(bwasPlot[, paste(c("Y","X", "Z"), style, sep = "_")]), col=bwasPlot$color, radius = bwasPlot$radius)
+rgl.snapshot(paste0(outputPath, "/BWAS_", bwasFile,"_", hemi, "_", moda ,"_",style, "_inside.png"))
 rgl.close()
 
 bwasPlot$X=bwasPlot$X*(-1)
 bwasPlot$Y=bwasPlot$Y*(-1)
 par3d(windowRect = c(0, 0, 800, 800)*1.5, zoom=0.8)
-spheres3d(as.matrix(bwasPlot[,c( "Y","X", "Z")]), col=bwasPlot$color, radius = bwasPlot$radius)
-rgl.snapshot(paste0(outputPath, "/BWAS_", bwasFile,"_", hemi, "_", moda , "_outside.png"))
+spheres3d(as.matrix(bwasPlot[, paste(c("Y","X", "Z"), style, sep = "_")]), col=bwasPlot$color, radius = bwasPlot$radius)
+rgl.snapshot(paste0(outputPath, "/BWAS_", bwasFile,"_", hemi, "_", moda ,"_",style,  "_outside.png"))
 rgl.close()
 
 }}
 }
 
 
+#' Scan association file to return the range of the association statistics (for the significant vertices)
+#'
+#' This function takes in raw brain association maps, and returns the range of association, which can be used to inform plotting
+#'
+#'
+#' @param inputPath path (folder) to the raw brain association maps (outputs of OSCA)
+#' @param bwasFile name of the brain association map
+#' @param variancePheno variance of the phenotypes (to estimate correlation)
+#' @param signifThreshold pvalue significance threshold used to account for multiple testing
+#' @return Range of correlation coefficients, useful to set appropriate legend bar and cor range in plotting function
+#' @import plyr png qqman Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices vroom
+#' @export
+getCorrelationRange<-function(inputPath , bwasFile , variancePheno, signifThreshold){
 
+# Open summary statistics
+BWASsumstatfile<-  vroom( paste0(inputPath ,  bwasFile), show_col_types = F)
+BWASsumstatfile=BWASsumstatfile[which(BWASsumstatfile$p < signifThreshold),]
+return(range(BWASsumstatfile$b/sqrt(variancePheno), na.rm = T))
+
+}
 
 #' Combine cortical and subcortical figures to create a multi-panel plot
 #'
@@ -363,10 +383,11 @@ rgl.close()
 #'
 #' @param outputPath path where the outputs will be written
 #' @param correlationRange range of the correlation coefficients (for improved colors) - default is (-1; 1)
+#' @param statisticsName name of the statistics, which is to appear on top of the legend (default is "Correlation")
 #' @return The legend bar with manually selected range of effect sizes.
 #' @import RColorBrewer
 #' @export
-createLegendBar=function(outputPath, correlationRange=c(-1,1)){
+createLegendBar=function(outputPath, correlationRange=c(-1,1), statisticsName="Correlation"){
 cols=c(RColorBrewer::brewer.pal(n = 10, name = "RdYlBu")[10:6],RColorBrewer::brewer.pal(n = 10, name = "RdYlBu")[5:1]) # Select palette colours
 
 png(paste0(outputPath, "/legendbar", correlationRange[1],"_",correlationRange[2], ".png"), width = 5, height = 15, units = "cm", res = 400)
@@ -375,7 +396,7 @@ my.colors = colorRampPalette(cols)
 z=matrix(1:100,nrow=1)
 x=1
 y=seq(correlationRange[1],correlationRange[2],len=100)
-image(x,y,z,col=my.colors(20),axes=FALSE,xlab="",ylab="", main="Correlation")
+image(x,y,z,col=my.colors(20),axes=FALSE,xlab="",ylab="", main=statisticsName)
 axis(2)
 dev.off()
 }
@@ -391,18 +412,25 @@ dev.off()
 #' @param bwasFile name of bwas file (used in naming of cortical and subcortical plots)
 #' @param pathToLegendBar Path to the legend bar, created with createLegendBar()
 #' @param outputPath folder where the outputs will be written
+#' @param style style for plotting (based on the different cortical fsaverage surface). Possible options: "orig", "pial", "sphere", "inflated",  "inflated_pre",  "pial_semi_inflated",  "smoothwm" (default)
 #' @return A combined plot with cortical and subcortical surface plots and legendbar
 #' @import plyr png qqman Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices
 #' @export
-combineCorticalSubcorticalPlots=function(inputPath, bwasFile, pathToLegendBar, outputPath){
+combineCorticalSubcorticalPlots=function(inputPath, bwasFile, pathToLegendBar, outputPath, style="smoothwm"){
 
 # List of files
 ll=NULL
-for (moda in c("thickness", "area","thick", "LogJacs") ){
-ll=c(ll, paste0(inputPath, "/BWAS_", bwasFile, "_", "lh", "_", moda, "_outside.png"))
-ll=c(ll, paste0(inputPath, "/BWAS_", bwasFile, "_","lh", "_", moda, "_inside.png"))
-ll=c(ll, paste0(inputPath, "/BWAS_", bwasFile, "_", "rh", "_", moda, "_inside.png"))
-ll=c(ll, paste0(inputPath, "/BWAS_", bwasFile, "_", "rh", "_", moda, "_outside.png"))
+for (moda in c("thickness", "area") ){
+ll=c(ll, paste0(inputPath, "/BWAS_", bwasFile, "_", "lh", "_", moda,"_",style,  "_outside.png"))
+ll=c(ll, paste0(inputPath, "/BWAS_", bwasFile, "_","lh", "_", moda,"_",style,  "_inside.png"))
+ll=c(ll, paste0(inputPath, "/BWAS_", bwasFile, "_", "rh", "_", moda,"_",style,  "_inside.png"))
+ll=c(ll, paste0(inputPath, "/BWAS_", bwasFile, "_", "rh", "_", moda, "_",style, "_outside.png"))
+}
+for (moda in c("thick", "LogJacs") ){
+ll=c(ll, paste0(inputPath, "/BWAS_", bwasFile, "_", "lh", "_", moda,  "_outside.png"))
+ll=c(ll, paste0(inputPath, "/BWAS_", bwasFile, "_","lh", "_", moda,  "_inside.png"))
+ll=c(ll, paste0(inputPath, "/BWAS_", bwasFile, "_", "rh", "_", moda,  "_inside.png"))
+ll=c(ll, paste0(inputPath, "/BWAS_", bwasFile, "_", "rh", "_", moda,  "_outside.png"))
 }
 ll=c(ll, paste0(pathToLegendBar))
 
@@ -840,10 +868,11 @@ image_write(image = img_animated, path = paste0(outputPath, "/BWAS_", bwasFile, 
 #' @param outputPath path where the outputs will be written. Absolute path may be required to produce GIF.
 #' @param correlationRange range of the correlation coefficients (for improved colors) - default is (-1; 1)
 #' @param faster downsample mesh for faster plotting (e.g. testing)
+#' @param style style for plotting (based on the different cortical fsaverage surface). Possible options: "orig", "pial", "sphere", "inflated",  "inflated_pre",  "pial_semi_inflated",  "smoothwm" (default)
 #' @return Several snapshots of the rotating cortex and a GIF
 #' @import plyr png qqman Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices mvMonitoring
 #' @export
-plotCorticalGIF=function(inputPath, bwasFile, variancePheno, signifThreshold, moda, hemi,  outputPath, nbImagesForGif, correlationRange=c(-1,1), faster){
+plotCorticalGIF=function(inputPath, bwasFile, variancePheno, signifThreshold, moda, hemi,  outputPath, nbImagesForGif, correlationRange=c(-1,1), faster, style){
 
 # Open files and annotate
 bwasPlot=vroom(paste0(inputPath, bwasFile ) , show_col_types = F)
@@ -873,11 +902,56 @@ bwasPlot=bwasPlot[exctr,]
 # Add max - min points to set camera
 # Add max points to fix camera
 par3d(windowRect = c(0, 0, 800, 800)*1.5, zoom=0.8)
-spheres3d(as.matrix(bwasPlot[,c( "Y","X", "Z")]), col=bwasPlot$color, radius = bwasPlot$radius )
-movie3d( spin3d(rpm=10), duration = 6, fps = nbImagesForGif/6 , frames = paste0(outputPath, "/BWAS_", bwasFile,"_", hemi, "_", moda , "_GIF_"), dir = outputPath,  convert=NULL, clean=F, movie = paste0(outputPath, "/BWAS_", bwasFile,"_", hemi, "_", moda , "_GIF") )
+spheres3d(as.matrix(bwasPlot[, paste(c("Y","X", "Z"), style, sep = "_")]), col=bwasPlot$color, radius = bwasPlot$radius )
+movie3d( spin3d(rpm=10), duration = 6, fps = nbImagesForGif/6 , frames = paste0(outputPath, "/BWAS_", bwasFile,"_", hemi, "_", moda , "_", style,"_GIF_"), dir = outputPath,  convert=NULL, clean=F, movie = paste0(outputPath, "/BWAS_", bwasFile,"_", hemi, "_", moda ,"_", style, "_GIF") )
 rgl.close()
 
 }
 
 
+
+
+#' Combine subcortical figures to create a multi-panel plot
+#'
+#' This function uses the subcortical figures created using the specific functions
+#'
+#'
+#' @param inputPath path (folder) to the cortical and subcortical plots
+#' @param bwasFile name of bwas file (used in naming of cortical and subcortical plots)
+#' @param pathToLegendBar Path to the legend bar, created with createLegendBar()
+#' @param outputPath folder where the outputs will be written
+#' @return A combined plot with cortical and subcortical surface plots and legendbar
+#' @import plyr png qqman Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices
+#' @export
+combineSubcorticalPlots=function(inputPath, bwasFile, pathToLegendBar, outputPath){
+
+# List of files
+ll=NULL
+for (moda in c("thick", "LogJacs") ){
+ll=c(ll, paste0(inputPath, "/BWAS_", bwasFile, "_", "lh", "_", moda, "_outside.png"))
+ll=c(ll, paste0(inputPath, "/BWAS_", bwasFile, "_","lh", "_", moda, "_inside.png"))
+ll=c(ll, paste0(inputPath, "/BWAS_", bwasFile, "_", "rh", "_", moda, "_inside.png"))
+ll=c(ll, paste0(inputPath, "/BWAS_", bwasFile, "_", "rh", "_", moda, "_outside.png"))
+}
+ll=c(ll, paste0(pathToLegendBar))
+
+# Crop and convert format
+plots2 <- lapply(ll<-ll,function(x){
+  if(x!=paste0(pathToLegendBar)){
+   img <- as.raster(readPNG(x)[,100:1100,])} else {
+    # img <- as.raster(readPNG(x))} else {
+     img <- as.raster(readPNG(x)[,,])
+    }
+    rasterGrob(img, interpolate = T)
+
+})
+
+# Lay and write png
+lay <- rbind(c(1,1,3,3,5,5,7,7,9),
+            c(2,2,4,4,6,6,8,8,9))
+
+gs=grid.arrange(grobs = plots2, layout_matrix = lay)
+ggsave(paste0(outputPath, "/Plots_SubcorticalCombined", bwasFile, ".png"),width=10, height=4, gs)
+
+}
 
