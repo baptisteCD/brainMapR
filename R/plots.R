@@ -437,7 +437,7 @@ ll=c(ll, paste0(pathToLegendBar))
 # Crop and convert format
 plots2 <- lapply(ll<-ll,function(x){
   if(x!=paste0(pathToLegendBar)){
-   img <- as.raster(readPNG(x)[,100:1100,])} else {
+   img <- as.raster(readPNG(x)[,50:1150,])} else {
     # img <- as.raster(readPNG(x))} else {
      img <- as.raster(readPNG(x)[,,])
     }
