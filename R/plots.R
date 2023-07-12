@@ -344,8 +344,8 @@ spheres3d(as.matrix(bwasPlot[, paste(c("Y","X", "Z"), style, sep = "_")]), col=b
 rgl.snapshot(paste0(outputPath, "/BWAS_", bwasFile,"_", hemi, "_", moda ,"_",style, "_inside.png"))
 rgl.close()
 
-bwasPlot$X=bwasPlot$X*(-1)
-bwasPlot$Y=bwasPlot$Y*(-1)
+bwasPlot[, paste(c("X"), style, sep = "_")]=bwasPlot[, paste(c("X"), style, sep = "_")]*(-1)
+bwasPlot[, paste(c("Y"), style, sep = "_")]=bwasPlot[, paste(c("Y"), style, sep = "_")]*(-1)
 par3d(windowRect = c(0, 0, 800, 800)*1.5, zoom=0.8)
 spheres3d(as.matrix(bwasPlot[, paste(c("Y","X", "Z"), style, sep = "_")]), col=bwasPlot$color, radius = bwasPlot$radius)
 rgl.snapshot(paste0(outputPath, "/BWAS_", bwasFile,"_", hemi, "_", moda ,"_",style,  "_outside.png"))
