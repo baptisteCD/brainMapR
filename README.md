@@ -12,6 +12,10 @@ Left subcortical thickness (regions associated with age)
 
 ![Alt Text](https://github.com/baptisteCD/brainMapR/blob/main/lh_thick_combined.gif)
 
+All surface styles from FreeSurfer are available, and handy one-line gif functions are implemented
+
+![Alt Text](https://github.com/baptisteCD/brainMapR/blob/main/BWAS_BWAS_Age_MRI.linear_lh_thickness_AllStylesPial_leftview.gif)
+
 
 --> See code example and usage [**here**](https://baptistecd.github.io/Brain-Mapping-LMM/RR_9_Extractresults_RealPhenotypes.html).
 
