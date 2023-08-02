@@ -851,10 +851,10 @@ image_write(image = img_animated, path = paste0(outputPath, "/BWAS_", bwasFile, 
 }
 
 
-#' Cortical brain plots for GIF
+#' Cortical brain plots for GIF - rotation
 #'
 #' This function reads in a brain association map.
-#' It produces snapshots of the brain surfaces.
+#' It produces snapshots of the brain surfaces with a 360 degrees rotation.
 #' The function needs the variance of the phenotype, in order to convert association betas into correlation coefficients.
 #'
 #'
@@ -908,6 +908,104 @@ rgl.close()
 
 }
 
+#' Cortical brain plots for GIF - across styles of plotting
+#'
+#' This function reads in a brain association map.
+#' It produces snapshots of the brain surfaces that progressively go from one surface style to another (e.g. from pial to inflated).
+#' The function needs the variance of the phenotype, in order to convert association betas into correlation coefficients.
+#'
+#'
+#' @param inputPath path (folder) to the raw brain association maps
+#' @param bwasFile name of the brain association map
+#' @param variancePheno Variance of the phenotype (used to standardise the effect sizes into correlations)
+#' @param signifThreshold pvalue significance threshold
+#' @param moda modality to plot ("thickness" or "area")
+#' @param hemi hemisphere to plot ("lh" or "rh")
+#' @param nbImagesForGif Number of png images to generate for the gif. The larger the smoother the gif, but the longer it takes to generate. Please use a multiple of 6 if you want the GIF to be created automatically.
+#' @param outputPath path where the outputs will be written. Absolute path may be required to produce GIF.
+#' @param correlationRange range of the correlation coefficients (for improved colors) - default is (-1; 1)
+#' @param faster downsample mesh for faster plotting (e.g. testing)
+#' @param leftOrRightView direction of the view (e.g. for left hemisphere left view corresponds to outside view)
+#' @param styleStart style for plotting, which will be the starting style of the GIF. Possible options: "orig", "pial", "sphere", "inflated",  "inflated_pre",  "pial_semi_inflated", "white"
+#' @param styleEnd style for plotting, which will be the ending style of the GIF. Possible options: "orig", "pial", "sphere", "inflated",  "inflated_pre",  "pial_semi_inflated", "white"
+#' @return Several snapshots of the rotating cortex and a GIF
+#' @import plyr png qqman Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices mvMonitoring
+#' @export
+plotCorticalAtlasToAtlasGif=function(inputPath, bwasFile, variancePheno, signifThreshold, moda, hemi,  outputPath, nbImagesForGif, correlationRange=c(-1,1), faster, leftOrRightView,styleStart, styleEnd){
+
+# Open files and annotate
+bwasPlot=vroom(paste0(inputPath, bwasFile ) , show_col_types = F)
+bwasPlot=formatBWAScortical(BWASsumstat = bwasPlot, hemi = hemi, mod = moda)
+
+# Transform betas in correlations
+bwasPlot$cor=bwasPlot$b/sqrt(variancePheno)
+
+# Identify significant vertices to plot
+bwasPlot$signifVoxel=ifelse(bwasPlot$p < signifThreshold, 1 ,0)
+
+# Atttribute colors on a diverging palette
+bwasPlot$colorScale <- cut(bwasPlot$cor, breaks = seq(correlationRange[1], correlationRange[2], len = 21),  include.lowest = TRUE)
+
+## Use bin indices, ii, to select color from vector of n-1 equally spaced colors
+cols=c(RColorBrewer::brewer.pal(n = 10, name = "RdYlBu")[10:6], RColorBrewer::brewer.pal(n = 10, name = "RdYlBu")[5:1]) # Select palette colours
+bwasPlot$color <- colorRampPalette(c(cols))(21)[bwasPlot$colorScale] # Make it more continuous
+bwasPlot$color[which(bwasPlot$signifVoxel==0)]="darkgrey"
+bwasPlot$radius=ifelse(bwasPlot$signifVoxel==1, 2, 0.8)
+
+if (faster==T){
+set.seed(8)
+exctr=sample(x = 1:dim(bwasPlot)[1], size = dim(bwasPlot)[1]/4, replace = F)
+bwasPlot=bwasPlot[exctr,]
+}
+
+if (leftOrRightView=="left" & hemi=="lh" | leftOrRightView=="left" & hemi=="rh" ){
+bwasPlot[, paste(c("X"), styleStart, sep = "_")]=bwasPlot[, paste(c("X"), styleStart, sep = "_")]*(-1)
+bwasPlot[, paste(c("Y"), styleStart, sep = "_")]=bwasPlot[, paste(c("Y"), styleStart, sep = "_")]*(-1)
+bwasPlot[, paste(c("X"), styleEnd, sep = "_")]=bwasPlot[, paste(c("X"), styleEnd, sep = "_")]*(-1)
+bwasPlot[, paste(c("Y"), styleEnd, sep = "_")]=bwasPlot[, paste(c("Y"), styleEnd, sep = "_")]*(-1)
+
+}
+
+# Add max - min points to set camera
+# Add max points to fix camera
+par3d(windowRect = c(0, 0, 800, 800)*1.5, zoom=0.8)
+spheres3d(as.matrix(bwasPlot[, paste(c("Y","X", "Z"), styleStart, sep = "_")]), col=bwasPlot$color, radius = bwasPlot$radius )
+
+
+
+for (iii in 0:nbImagesForGif){
+print(iii)
+plotMax=bwasPlot[,paste(c("Y","X", "Z"), styleStart, sep = "_")]+(bwasPlot[,paste(c("Y","X", "Z"), styleEnd, sep = "_")]-bwasPlot[,paste(c("Y","X", "Z"), styleStart, sep = "_")]) / nbImagesForGif*(iii)
+plotMax=as.data.frame(plotMax)
+bwasPlot$Zplot=plotMax[,1]
+bwasPlot$Xplot=plotMax[,2]
+bwasPlot$Yplot=plotMax[,3]
+
+# Draw plots and save screenshots
+par3d(windowRect = c(0, 0, 800, 800)*1.5, zoom=0.8)
+spheres3d(as.matrix(bwasPlot[,c( "Zplot",  "Xplot", "Yplot")]), col=bwasPlot$color, radius = bwasPlot$radius)
+rgl.snapshot(paste0(outputPath, "/BWAS_", bwasFile, "_", hemi, "_", moda , "_",styleStart, "To", styleEnd, "_", leftOrRightView, "_view_",  sprintf(fmt = "%03d", iii), ".png"))
+rgl.close()
+}
+
+# Create GIF using magick functions
+
+# Combined GIF - all atlases
+print("Making GIF")
+imgs <- list.files(path = outputPath , pattern = paste0("BWAS_", bwasFile, "_", hemi, "_", moda , "_",styleStart, "To", styleEnd, "_", leftOrRightView),  full.names = T )
+imgs<-c(imgs[1:length(imgs)], imgs[length(imgs):1])
+
+img_list <- lapply(imgs, image_read)
+
+## join the images together
+img_joined <- image_join(img_list)
+
+## animate at 20 frames per second
+img_animated <- image_animate(img_joined, fps = 20)
+## save to disk
+image_write(image = img_animated, path = paste0("BWAS_", bwasFile, "_", hemi, "_", moda , "_",styleStart, "To", styleEnd, "_", leftOrRightView, "view.gif"))
+
+}
 
 
 
