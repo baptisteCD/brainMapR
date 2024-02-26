@@ -196,10 +196,11 @@ dev.off()
 #' @param signifThreshold pvalue significance threshold used to account for multiple testing
 #' @param correlationRange range of the correlation coefficients (for improved colors) - default is (-1; 1)
 #' @param outputPath path where the outputs will be written
+#' @param radius radius (size) of the significant vertices in plot
 #' @return Outside and Inside snapshots of the surfaces.
 #' @import plyr png qqman Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices
 #' @export
-plotSubcortical=function(inputPath, bwasFile, variancePheno, outputPath, signifThreshold, correlationRange=c(-1,1)){
+plotSubcortical=function(inputPath, bwasFile, variancePheno, outputPath, signifThreshold, correlationRange=c(-1,1), radius=1.5){
 
   for (moda in c("thick", "LogJacs")){
  for (hemi in c("lh", "rh")){
@@ -221,7 +222,7 @@ bwasPlot$colorScale <- cut(bwasPlot$cor, breaks = seq(correlationRange[1], corre
 cols=c(RColorBrewer::brewer.pal(n = 10, name = "RdYlBu")[10:6],RColorBrewer::brewer.pal(n = 10, name = "RdYlBu")[5:1]) # Select palette colours
 bwasPlot$color <- colorRampPalette(c(cols))(21)[bwasPlot$colorScale] # Make it more continuous
 bwasPlot$color[which(bwasPlot$signifVoxel==0)]="darkgrey"
-bwasPlot$radius=ifelse(  bwasPlot$signifVoxel==1, 1.5 ,0.8 )
+bwasPlot$radius=ifelse(  bwasPlot$signifVoxel==1, radius ,0.8 )
 
 # Draw plots and save screenshots
 par3d(windowRect = c(0, 0, 800, 800)*1.5, zoom=0.8)
@@ -252,10 +253,11 @@ rgl.close()
 #' @param signifThreshold pvalue significance threshold used to account for multiple testing
 #' @param correlationRange range of the correlation coefficients (for improved colors) - default is (-1; 1)
 #' @param outputPath path where the outputs will be written
+#' @param radius radius (size) of the significant vertices in plot
 #' @return Outside and Inside snapshots of the surfaces.
 #' @import plyr png qqman Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices vroom
 #' @export
-plotSubcortical_flat=function(inputPath, bwasFile, variancePheno, signifThreshold, outputPath, correlationRange=c(-1,1)){
+plotSubcortical_flat=function(inputPath, bwasFile, variancePheno, signifThreshold, outputPath, correlationRange=c(-1,1), radius=1.5){
 
 for (moda in c("thick", "LogJacs")){
  for (hemi in c("lh", "rh")){
@@ -277,7 +279,7 @@ bwasPlot$colorScale <- cut(bwasPlot$cor, breaks = seq(correlationRange[1], corre
 cols=c(RColorBrewer::brewer.pal(n = 10, name = "RdYlBu")[10:6],RColorBrewer::brewer.pal(n = 10, name = "RdYlBu")[5:1]) # Select palette colours
 bwasPlot$color <- colorRampPalette(c(cols))(21)[bwasPlot$colorScale] # Make it more continuous
 bwasPlot$color[which(bwasPlot$signifVoxel==0)]="darkgrey"
-bwasPlot$radius=ifelse(  bwasPlot$signifVoxel==1, 1.5 ,0.8 )
+bwasPlot$radius=ifelse(  bwasPlot$signifVoxel==1, radius ,0.8 )
 
 # Add flat coordinates
 bwasPlot=addFlatCoordinatesSubcortical(annotBwas = bwasPlot, hemi = hemi)
@@ -310,11 +312,11 @@ rgl.close()
 #' @param correlationRange range of the correlation coefficients (for improved colors) - default is (-1; 1)
 #' @param outputPath path where the outputs will be written
 #' @param style style for plotting (based on the different cortical fsaverage surface). Possible options: "orig", "pial", "sphere", "inflated",  "inflated_pre",  "pial_semi_inflated",  "smoothwm" (default)
+#' @param radius radius (size) of the significant vertices in plot
 #' @return Outside and Inside snapshots of the surfaces.
 #' @import plyr png qqman Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices vroom
 #' @export
-plotCortical=function(inputPath, bwasFile, variancePheno, signifThreshold, outputPath, correlationRange=c(-1,1), style="smoothwm"
-){
+plotCortical=function(inputPath, bwasFile, variancePheno, signifThreshold, outputPath, correlationRange=c(-1,1), style="smoothwm" , radius=2){
 
  for (moda in c("area", "thickness")){
 
@@ -336,7 +338,7 @@ bwasPlot$colorScale <- cut(bwasPlot$cor, breaks = seq(correlationRange[1], corre
 cols=c(RColorBrewer::brewer.pal(n = 10, name = "RdYlBu")[10:6], RColorBrewer::brewer.pal(n = 10, name = "RdYlBu")[5:1]) # Select palette colours
 bwasPlot$color <- colorRampPalette(c(cols))(21)[bwasPlot$colorScale] # Make it more continuous
 bwasPlot$color[which(bwasPlot$signifVoxel==0)]="darkgrey"
-bwasPlot$radius=ifelse(bwasPlot$signifVoxel==1, 2, 0.8)
+bwasPlot$radius=ifelse(bwasPlot$signifVoxel==1, radius, 0.8)
 
 # Draw plot
 par3d(windowRect = c(0, 0, 800, 800)*1.5, zoom=0.8)
