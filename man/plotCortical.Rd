@@ -11,7 +11,8 @@ plotCortical(
   signifThreshold,
   outputPath,
   correlationRange = c(-1, 1),
-  style = "smoothwm"
+  style = "smoothwm",
+  radius = 2
 )
 }
 \arguments{
@@ -28,6 +29,8 @@ plotCortical(
 \item{correlationRange}{range of the correlation coefficients (for improved colors) - default is (-1; 1)}
 
 \item{style}{style for plotting (based on the different cortical fsaverage surface). Possible options: "orig", "pial", "sphere", "inflated",  "inflated_pre",  "pial_semi_inflated",  "smoothwm" (default)}
+
+\item{radius}{radius (size) of the significant vertices in plot}
 }
 \value{
 Outside and Inside snapshots of the surfaces.

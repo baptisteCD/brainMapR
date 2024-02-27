@@ -10,7 +10,8 @@ plotSubcortical(
   variancePheno,
   outputPath,
   signifThreshold,
-  correlationRange = c(-1, 1)
+  correlationRange = c(-1, 1),
+  radius = 1.5
 )
 }
 \arguments{
@@ -25,6 +26,8 @@ plotSubcortical(
 \item{signifThreshold}{pvalue significance threshold used to account for multiple testing}
 
 \item{correlationRange}{range of the correlation coefficients (for improved colors) - default is (-1; 1)}
+
+\item{radius}{radius (size) of the significant vertices in plot}
 }
 \value{
 Outside and Inside snapshots of the surfaces.

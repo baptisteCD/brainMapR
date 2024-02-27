@@ -10,7 +10,8 @@ plotSubcortical_flat(
   variancePheno,
   signifThreshold,
   outputPath,
-  correlationRange = c(-1, 1)
+  correlationRange = c(-1, 1),
+  radius = 1.5
 )
 }
 \arguments{
@@ -25,6 +26,8 @@ plotSubcortical_flat(
 \item{outputPath}{path where the outputs will be written}
 
 \item{correlationRange}{range of the correlation coefficients (for improved colors) - default is (-1; 1)}
+
+\item{radius}{radius (size) of the significant vertices in plot}
 }
 \value{
 Outside and Inside snapshots of the surfaces.
