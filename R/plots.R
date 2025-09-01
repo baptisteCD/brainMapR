@@ -71,7 +71,7 @@ BWASsumstat<-formatBWASsubcortical(BWASsumstat = BWASsumstatfile , hemi = hemi, 
 }
 
 # Get all chi2 value
-BWASsumstat$CHI2=(BWASsumstatfile$b/BWASsumstatfile$se)**2
+BWASsumstat$CHI2=(BWASsumstat$b/BWASsumstat$se)**2
 
 # Set colors for Manhattan plot
 laab<-unique(BWASsumstat$ROINb)
