@@ -58,7 +58,7 @@ return(bwas)
 #' This function reads a formatted brain association map (with X Y Z coordinates).
 #'
 #'
-#' @param outputFolder path to the output/writing directory
+#' @param outputPath path to the output/writing directory
 #' @param bwas Formatted brain association map
 #' @param moda Measurement type ("area" or "thickness" for cortical measurements; "LogJacs" or "thick" for subcortical)
 #' @param signifThreshold Significance threshold
@@ -67,7 +67,7 @@ return(bwas)
 #' @return Summary file of significant clusters and their properties
 #' @import plyr png qqman Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices
 #' @export
-clusterIdentification=function(outputFolder, bwas, moda, signifThreshold, KNearestNeighbours, phenotypeLabel){
+clusterIdentification=function(outputPath, bwas, moda, signifThreshold, KNearestNeighbours, phenotypeLabel){
 
 bwas11=NULL
 twoTPinCLuster=fwerProblemIncreaseK=0
@@ -119,7 +119,7 @@ if (moda %in% c("LogJacs", "thick")){ ROIlist=c(10, 11, 12, 13, 17, 18, 26, 49, 
     colnames(res)=c("NumberClusters", "maxSizeCluster", "medianSizeCluster", "minSizeCluster", "FWERcluster_ROI")
     # Write outputs and bwas table with all the informations (for plots etc..)
 
-    write.table(bwas11, file = paste0(outputFolder, phenotypeLabel , "_", moda, "_clustersAndCoordinates"), quote = F )
+    write.table(bwas11, file = paste0(outputPath, phenotypeLabel , "_", moda, "_clustersAndCoordinates"), quote = F )
     return(res)
 }
 
@@ -132,12 +132,12 @@ if (moda %in% c("LogJacs", "thick")){ ROIlist=c(10, 11, 12, 13, 17, 18, 26, 49, 
 #'
 #' @param inputPath path (folder) to the raw brain association maps (outputs of OSCA)
 #' @param bwasFile name of the brain association map (without extension)
-#' @param outputFolder path to output folder
+#' @param outputPath path to output folder
 #' @param signifThreshold significance threshold
 #' @return Summary file of significant clusters and their properties
 #' @import plyr png qqman Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices vroom
 #' @export
-identifyClustersBWAS=function(inputPath, bwasFile, outputFolder, signifThreshold){
+identifyClustersBWAS=function(inputPath, bwasFile, outputPath, signifThreshold){
 
 # Open BWAS result
 bwasResult=vroom(paste0(inputPath, bwasFile), show_col_types = F)
@@ -161,13 +161,13 @@ bwas=rbind(bwasFormattedlh, bwasFormattedrh)
 }
 
 # Run cluster statistic
-res=clusterIdentification(outputFolder =outputFolder, bwas = bwas,  moda = moda, signifThreshold = signifThreshold, KNearestNeighbours = 10, phenotypeLabel = bwasFile)
+res=clusterIdentification(outputPath =outputPath, bwas = bwas,  moda = moda, signifThreshold = signifThreshold, KNearestNeighbours = 10, phenotypeLabel = bwasFile)
 colnames(res)=paste0(colnames(res), "_", moda)
 resTot=c(resTot, res)
 }
 
 # Write final output - with all iterations
-write.table(resTot, paste0(outputFolder, "/Results_clusterFWER_", bwasFile ,  ".txt" ))
+write.table(resTot, paste0(outputPath, "/Results_clusterFWER_", bwasFile ,  ".txt" ))
 
 
 }
