@@ -13,7 +13,7 @@
 #' @param bwasSampleSize Optional : If character, the name of the columns in bwas file that contains the sample size (default "NMISS"). If numeric, the sample size.
 #' @param outputPath path where the outputs will be written
 #' @return Morphometricity, SE, confidence intervals and pvalue, SumR2 intercept and SE.
-#' @import data.table bigsnpr vroom
+#' @import bigsnpr vroom plyr
 #' @export
 sumR2_regression_univariate=function(inputPath , bwasFile, refPanel, nblock=200, chi2Threshold=80, bwasSampleSize="NMISS" ){
 
