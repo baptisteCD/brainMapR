@@ -15,7 +15,7 @@
 #' @return Morphometricity, SE, confidence intervals and pvalue, SumR2 intercept and SE.
 #' @import bigsnpr vroom plyr
 #' @export
-sumR2_regression_univariate=function(inputPath , bwasFile, refPanel, nblock=200, chi2Threshold=80, bwasSampleSize="NMISS" ){
+sumR2_regression_univariate=function(inputPath , bwasFile, refPanel, nblock=200, chi2Threshold=80, bwasSampleSize="NMISS", outputPath ){
 
 # Open summary statistics
     BWASsignif=NULL
@@ -47,6 +47,7 @@ if(length(which(is.na(BWASsignif[,paste0("SumR2_", refPanel)])))>0){
 BWASsignif<-BWASsignif[-which(rowSums(is.na(BWASsignif[,grep(pattern = "SumR2_", x = colnames(BWASsignif))]))>0),]
 }
 
+# Get sample size in right format
 if (is.character(bwasSampleSize)){
 if (is.null(BWASsignif[1,bwasSampleSize])){
     print(paste0("Sample size (column ", bwasSampleSize, ") not present in the summary statistics, please provide a number of the name of the column"))
@@ -57,12 +58,13 @@ if (is.numeric(bwasSampleSize)){
     ssize=bwasSampleSize
 }
 
+# SumR2 regression
 ldresOutAll=NULL
 for (panel in refPanel){
 
     print(paste0("Estimating morphometricity using SumR2 regression. Using ", dim(BWASsignif)[1], " vertices and SumR2 from reference panel: ", panel ))
 
-ldres<-bigsnpr::snp_ldsc(ld_score = BWASsignif[,paste0("SumR2_", panel)], ld_size = ldsize, chi2 = BWASsignif$CHI2, sample_size = ssize ,chi2_thr1 = 80)
+ldres<-bigsnpr::snp_ldsc(ld_score = BWASsignif[,paste0("SumR2_", panel)], ld_size = dim(BWASsignif)[1], chi2 = BWASsignif$CHI2, sample_size = ssize ,chi2_thr1 = 80, blocks = nblock )
 pv= 2*pnorm(-abs(ldres[3]/ldres[4]))
 cil=ldres[3]-1.96*ldres[4]
 ciu=ldres[3]+1.96*ldres[4]
