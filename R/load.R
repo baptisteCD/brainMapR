@@ -14,7 +14,7 @@
 formatBWAScortical<-function(BWASsumstat, hemi, mod){
 
 # Open atlas with details about FreeSurfer fsaverage vertices
-atlas<-vroom( system.file("extdata/atlas", paste0("Atlas_allCoordinates_corticalVertices", "_", hemi, "_", mod, ".txt"), package = "brainMapR",mustWork = TRUE) )
+atlas<-vroom( system.file("extdata/atlas", paste0("Atlas_allCoordinates_corticalVertices", "_", hemi, "_", mod, ".txt"), package = "brainMapR",mustWork = TRUE) , show_col_types = FALSE )
 
 # Merge atlas and summary statistics
 BWASsumstat<-merge(BWASsumstat, atlas, by.x="Probe", by.y="vertexID" )
@@ -46,7 +46,7 @@ return(BWASsumstat)
 formatBWASsubcortical<-function(BWASsumstat, hemi, mod){
 
 # Open atlas with vertex information
-atlas<-vroom(system.file("extdata/atlas", "Atlas_coordinates_ROI_subortical.txt", package = "brainMapR",mustWork = TRUE), show_col_types = FALSE)
+atlas<-vroom(system.file("extdata/atlas", "Atlas_coordinates_ROI_subortical.txt", package = "brainMapR",mustWork = TRUE), show_col_types = FALSE, show_col_types = FALSE)
 
 # Merge with summary statistics
 BWASsumstat<-merge(BWASsumstat, atlas, by.x="Probe", by.y="ProbeID" )
