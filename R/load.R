@@ -46,7 +46,7 @@ return(BWASsumstat)
 formatBWASsubcortical<-function(BWASsumstat, hemi, mod){
 
 # Open atlas with vertex information
-atlas<-vroom(system.file("extdata/atlas", "Atlas_coordinates_ROI_subortical.txt", package = "brainMapR",mustWork = TRUE), show_col_types = FALSE, show_col_types = FALSE)
+atlas<-vroom(system.file("extdata/atlas", "Atlas_coordinates_ROI_subortical.txt", package = "brainMapR",mustWork = TRUE), show_col_types = FALSE)
 
 # Merge with summary statistics
 BWASsumstat<-merge(BWASsumstat, atlas, by.x="Probe", by.y="ProbeID" )
