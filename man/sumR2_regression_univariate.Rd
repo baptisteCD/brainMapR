@@ -10,7 +10,8 @@ sumR2_regression_univariate(
   refPanel,
   nblock = 200,
   chi2Threshold = 80,
-  bwasSampleSize = "NMISS"
+  bwasSampleSize = "NMISS",
+  outputPath
 )
 }
 \arguments{
