@@ -44,15 +44,15 @@ BWASsignif<-BWASsignif[-which(is.na(BWASsignif$p)),]
 }
 # Remove vertices with no SumR2 (missing from calculations due to missingness or lack of variability in data)
 if(length(which(is.na(BWASsignif[,paste0("SumR2_", refPanel)])))>0){
-BWASsignif<-BWASsignif[-which(rowSums(is.na(BWASsignif[,grep(pattern = "SumR2_", x = colnames(BWASsignif))]))>0),]
+BWASsignif2<-BWASsignif[-which(is.na(BWASsignif[,paste0("SumR2_", refPanel)])),]
 }
 
 # Get sample size in right format
 if (is.character(bwasSampleSize)){
-if (is.null(BWASsignif[1,bwasSampleSize])){
+if (is.null(BWASsignif2[1,bwasSampleSize])){
     print(paste0("Sample size (column ", bwasSampleSize, ") not present in the summary statistics, please provide a number of the name of the column"))
 } else {
-    ssize=BWASsignif[1,bwasSampleSize]
+    ssize=BWASsignif2[1,bwasSampleSize]
 } }
 if (is.numeric(bwasSampleSize)){
     ssize=bwasSampleSize
@@ -62,9 +62,9 @@ if (is.numeric(bwasSampleSize)){
 ldresOutAll=NULL
 for (panel in refPanel){
 
-    print(paste0("Estimating morphometricity using SumR2 regression. Using ", dim(BWASsignif)[1], " vertices and SumR2 from reference panel: ", panel ))
+    print(paste0("Estimating morphometricity using SumR2 regression. Using ", dim(BWASsignif2)[1], " vertices and SumR2 from reference panel: ", panel ))
 
-ldres<-bigsnpr::snp_ldsc(ld_score = BWASsignif[,paste0("SumR2_", panel)], ld_size = dim(BWASsignif)[1], chi2 = BWASsignif$CHI2, sample_size = ssize ,chi2_thr1 = 80, blocks = nblock )
+ldres<-bigsnpr::snp_ldsc(ld_score = BWASsignif2[,paste0("SumR2_", panel)], ld_size = dim(BWASsignif2)[1], chi2 = BWASsignif2$CHI2, sample_size = ssize ,chi2_thr1 = 80, blocks = nblock )
 pv= 2*pnorm(-abs(ldres[3]/ldres[4]))
 cil=ldres[3]-1.96*ldres[4]
 ciu=ldres[3]+1.96*ldres[4]
