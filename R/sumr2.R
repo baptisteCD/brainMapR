@@ -42,10 +42,6 @@ BWASsignif=plyr::rbind.fill(BWASsignif, BWASsumstat)
 if(length(which(is.na(BWASsignif$p)))>0){
 BWASsignif<-BWASsignif[-which(is.na(BWASsignif$p)),]
 }
-# Remove vertices with no SumR2 (missing from calculations due to missingness or lack of variability in data)
-if(length(which(is.na(BWASsignif[,paste0("SumR2_", refPanel)])))>0){
-BWASsignif2<-BWASsignif[-which(is.na(BWASsignif[,paste0("SumR2_", refPanel)])),]
-}
 
 # Get sample size in right format
 if (is.character(bwasSampleSize)){
@@ -61,6 +57,11 @@ if (is.numeric(bwasSampleSize)){
 # SumR2 regression
 ldresOutAll=NULL
 for (panel in refPanel){
+
+    # Remove vertices with no SumR2 (missing from calculations due to missingness or lack of variability in data)
+if(length(which(is.na(BWASsignif[,paste0("SumR2_", refPanel)])))>0){
+BWASsignif2<-BWASsignif[-which(is.na(BWASsignif[,paste0("SumR2_", refPanel)])),]
+}
 
     print(paste0("Estimating morphometricity using SumR2 regression. Using ", dim(BWASsignif2)[1], " vertices and SumR2 from reference panel: ", panel ))
 
