@@ -12,10 +12,11 @@
 #' @param chi2Threshold Chi2 threshold to exclude vertices with outlying large association - (default 80)
 #' @param bwasSampleSize Optional : If character, the name of the columns in bwas file that contains the sample size (default "NMISS"). If numeric, the sample size.
 #' @param outputPath path where the outputs will be written
+#' @param varConstrained (TRUE/FALSE, default = T) whether variance components estimates should be constrained to be between 0 and 1
 #' @return Morphometricity, SE, confidence intervals and pvalue, SumR2 intercept and SE.
 #' @import GFA vroom plyr
 #' @export
-sumR2_regression_univariate=function(inputPath , bwasFile, refPanel, nblock=200, chi2Threshold=80, bwasSampleSize="NMISS", outputPath ){
+sumR2_regression_univariate=function(inputPath , bwasFile, refPanel, nblock=200, chi2Threshold=80, bwasSampleSize="NMISS", outputPath, varConstrained=TRUE ){
 
 # Open summary statistics
     BWASsignif=NULL
@@ -66,6 +67,15 @@ BWASsignif2<-BWASsignif[-which(is.na(BWASsignif[,paste0("SumR2_", panel)])),]
     print(paste0("Estimating morphometricity using SumR2 regression. Using ", dim(BWASsignif2)[1], " vertices and SumR2 from reference panel: ", panel ))
 
 ldres<-GFA::snp_ldsc(ld_score = BWASsignif2[,paste0("SumR2_", panel)], ld_size = dim(BWASsignif2)[1], chi2 = BWASsignif2$CHI2, sample_size = ssize ,chi2_thr1 = 80, blocks = nblock )
+
+if (varConstrained==T){
+   if (ldres[3]>1){
+       ldres[3]=1
+      print("Variance constrained to 1") }
+     if (ldres[3]<0){
+       ldres[3]=0.00001
+      print("Variance constrained to 0") }
+}
 
 pv= 2*pnorm(-abs(ldres[3]/ldres[4]))
 cil=ldres[3]-1.96*ldres[4]
