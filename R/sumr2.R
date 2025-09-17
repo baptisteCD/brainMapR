@@ -13,7 +13,7 @@
 #' @param bwasSampleSize Optional : If character, the name of the columns in bwas file that contains the sample size (default "NMISS"). If numeric, the sample size.
 #' @param outputPath path where the outputs will be written
 #' @return Morphometricity, SE, confidence intervals and pvalue, SumR2 intercept and SE.
-#' @import bigsnpr vroom plyr
+#' @import GFA vroom plyr
 #' @export
 sumR2_regression_univariate=function(inputPath , bwasFile, refPanel, nblock=200, chi2Threshold=80, bwasSampleSize="NMISS", outputPath ){
 
@@ -59,13 +59,14 @@ ldresOutAll=NULL
 for (panel in refPanel){
 
     # Remove vertices with no SumR2 (missing from calculations due to missingness or lack of variability in data)
-if(length(which(is.na(BWASsignif[,paste0("SumR2_", refPanel)])))>0){
-BWASsignif2<-BWASsignif[-which(is.na(BWASsignif[,paste0("SumR2_", refPanel)])),]
+if(length(which(is.na(BWASsignif[,paste0("SumR2_", panel)])))>0){
+BWASsignif2<-BWASsignif[-which(is.na(BWASsignif[,paste0("SumR2_", panel)])),]
 }
 
     print(paste0("Estimating morphometricity using SumR2 regression. Using ", dim(BWASsignif2)[1], " vertices and SumR2 from reference panel: ", panel ))
 
-ldres<-bigsnpr::snp_ldsc(ld_score = BWASsignif2[,paste0("SumR2_", panel)], ld_size = dim(BWASsignif2)[1], chi2 = BWASsignif2$CHI2, sample_size = ssize ,chi2_thr1 = 80, blocks = nblock )
+ldres<-GFA::snp_ldsc(ld_score = BWASsignif2[,paste0("SumR2_", panel)], ld_size = dim(BWASsignif2)[1], chi2 = BWASsignif2$CHI2, sample_size = ssize ,chi2_thr1 = 80, blocks = nblock )
+
 pv= 2*pnorm(-abs(ldres[3]/ldres[4]))
 cil=ldres[3]-1.96*ldres[4]
 ciu=ldres[3]+1.96*ldres[4]
@@ -99,10 +100,10 @@ return(ldresOutAll)
 #' @return Morphometricity, SE, confidence intervals and pvalue, SumR2 intercept and SE.
 #' @import GFA vroom plyr foreach
 #' @export
-sumR2_regression_bivariate(inputPath = inputPath , bwasFile = bwasFile , refPanel = c("ADNI1", "ADNI2GO3", "AIBL"), nblock=200, chi2Threshold=80, bwasSampleSize=c("NMISS", "NMISS"), varConstrained=T ){
+sumR2_regression_bivariate=function(inputPath = inputPath , bwasFile = bwasFile , refPanel = c("ADNI1", "ADNI2GO3", "AIBL"), nblock=200, chi2Threshold=80, bwasSampleSize=c("NMISS", "NMISS"), varConstrained=TRUE){
 
 # Open summary statistics
-    BWASsignif=NULL
+BWASsignif=NULL
 BWASsumstatfilePath = paste0(inputPath[1] ,  bwasFile[1])
 BWASsumstatfile<-  vroom(BWASsumstatfilePath, show_col_types = F)
 # Loop on modality and hemispheres to annotate summary statistics and plot sections of Manhattan plot
@@ -121,14 +122,12 @@ BWASsumstat$CHI2=(BWASsumstat$b/BWASsumstat$se)**2
 BWASsignif=plyr::rbind.fill(BWASsignif, BWASsumstat)
   } }
 
+# Add second set of sum-stats
 BWASsumstatfilePath2 = paste0(inputPath[2] ,  bwasFile[2])
 BWASsumstatfile2<-  vroom(BWASsumstatfilePath2, show_col_types = F)
-
 BWASsignif=merge(BWASsignif, BWASsumstatfile2, by="Probe", suffixes = c("_1", "_2"))
-
 BWASsignif$z_1=BWASsignif$b_1/BWASsignif$se_1
 BWASsignif$z_2=BWASsignif$b_2/BWASsignif$se_2
-
 
 # Remove vertices with missing association in either bwas
 if (length(which(is.na(BWASsignif$p_1)))>0 | length(which(is.na(BWASsignif$p_2)))>0){
@@ -144,7 +143,6 @@ if (is.null(BWASsignif[1,bwasSampleSize[1]])){
 } } else {
     ssize1=as.numeric(bwasSampleSize[1])
 }
-
 
 # Get sample size in right format
 if (is.na(suppressWarnings(as.numeric(bwasSampleSize[2])))){
@@ -165,11 +163,9 @@ if(length(which(is.na(BWASsignif[,paste0("SumR2_", panel)])))>0){
 BWASsignif2<-BWASsignif[-which(is.na(BWASsignif[,paste0("SumR2_", panel)])),]
 }
 
-    print(paste0("Estimating rGM using SumR2 regression. Using ", dim(BWASsignif2)[1], " vertices and SumR2 from reference panel: ", panel ))
-
+print(paste0("Estimating rGM using SumR2 regression. Using ", dim(BWASsignif2)[1], " vertices and SumR2 from reference panel: ", panel ))
 
 ldres=GFA::ldsc_rg(ld_score = BWASsignif2[,paste0("SumR2_", panel)], ld_size = dim(BWASsignif2)[1], z1=BWASsignif2$z_1 ,z2=BWASsignif2$z_2 , sample_size_1 = ssize1, sample_size_2=ssize2, blocks=nblock, chi2_thr2=chi2Threshold)
-
 
 # Constrained or unconstrained variance estimates
 if (varConstrained==T){
@@ -202,7 +198,6 @@ ciu2=ldres[9]+1.96*ldres[10]
 pvrg= 2*pnorm(-abs(ldres[11]/ldres[12]))
 cilrg=ldres[11]-1.96*ldres[12]
 ciurg=ldres[11]+1.96*ldres[12]
-
 
 ldresOut=t(as.data.frame(c(panel,c(ldres[1:8]), pv1, cil1, ciu1, c(ldres[9:10]), pv2, cil2, ciu2, c(ldres[11:12]), pvrg, cilrg, ciurg)))
 
