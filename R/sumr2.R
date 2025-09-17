@@ -45,10 +45,10 @@ BWASsignif<-BWASsignif[-which(is.na(BWASsignif$p)),]
 
 # Get sample size in right format
 if (is.character(bwasSampleSize)){
-if (is.null(BWASsignif2[1,bwasSampleSize])){
+if (is.null(BWASsignif[1,bwasSampleSize])){
     print(paste0("Sample size (column ", bwasSampleSize, ") not present in the summary statistics, please provide a number of the name of the column"))
 } else {
-    ssize=BWASsignif2[1,bwasSampleSize]
+    ssize=BWASsignif[1,bwasSampleSize]
 } }
 if (is.numeric(bwasSampleSize)){
     ssize=bwasSampleSize
