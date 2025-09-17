@@ -107,10 +107,11 @@ return(ldresOutAll)
 #' @param chi2Threshold Chi2 threshold to exclude vertices with outlying large association - (default 80)
 #' @param bwasSampleSize Optional : If character, the name of the columns in bwas file that contains the sample size (default "NMISS"). If numeric, the sample sizes.
 #' @param varConstrained (TRUE/FALSE, default = T) whether variance components estimates should be constrained to be between 0 and 1
+#' @param outputPath path where the outputs will be written
 #' @return Morphometricity, SE, confidence intervals and pvalue, SumR2 intercept and SE.
 #' @import GFA vroom plyr foreach
 #' @export
-sumR2_regression_bivariate=function(inputPath = inputPath , bwasFile = bwasFile , refPanel = c("ADNI1", "ADNI2GO3", "AIBL"), nblock=200, chi2Threshold=80, bwasSampleSize=c("NMISS", "NMISS"), varConstrained=TRUE){
+sumR2_regression_bivariate=function(inputPath = inputPath , bwasFile = bwasFile , refPanel = c("ADNI1", "ADNI2GO3", "AIBL"), nblock=200, chi2Threshold=80, bwasSampleSize=c("NMISS", "NMISS"), varConstrained=TRUE, outputPath){
 
 # Open summary statistics
 BWASsignif=NULL
@@ -217,6 +218,7 @@ rownames(ldresOut)=NULL
 ldresOutAll=rbind(ldresOutAll, ldresOut)
 }
 
+write.table(ldresOutAll, paste0(outputPath, "/SumR2_regression_bivariate_" , bwasFile[1], "_", bwasFile[2], ".rsq"), col.names = T, row.names = F)
 return(ldresOutAll)
 }
 
