@@ -11,7 +11,8 @@ sumR2_regression_bivariate(
   nblock = 200,
   chi2Threshold = 80,
   bwasSampleSize = c("NMISS", "NMISS"),
-  varConstrained = TRUE
+  varConstrained = TRUE,
+  outputPath
 )
 }
 \arguments{
@@ -28,6 +29,8 @@ sumR2_regression_bivariate(
 \item{bwasSampleSize}{Optional : If character, the name of the columns in bwas file that contains the sample size (default "NMISS"). If numeric, the sample sizes.}
 
 \item{varConstrained}{(TRUE/FALSE, default = T) whether variance components estimates should be constrained to be between 0 and 1}
+
+\item{outputPath}{path where the outputs will be written}
 }
 \value{
 Morphometricity, SE, confidence intervals and pvalue, SumR2 intercept and SE.

@@ -1055,3 +1055,156 @@ ggsave(paste0(outputPath, "/Plots_SubcorticalCombined", bwasFile, ".png"),width=
 
 }
 
+
+
+#' Combine ROI figures to create a multi-panel plot of ROI associations with legend
+#'
+#' This function uses the cortical and subcortical figures created using the specific functions
+#'
+#'
+#' @param inputPath path (folder) to the cortical and subcortical plots
+#' @param bwasFile name of bwas file (used in naming of cortical and subcortical plots)
+#' @param pathToLegendBar Path to the legend bar, created with createLegendBar()
+#' @param outputPath folder where the outputs will be written
+#' @param style style for plotting, Possible options: "orig", "pial", "sphere", "inflated",  "inflated_pre",  "pial_semi_inflated", "white", "smoothwm" (default)
+#' @return A combined plot with cortical and subcortical surface plots and legendbar
+#' @import plyr png qqman Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices
+#' @export
+combineCorticalSubcorticalPlots_ROI=function (inputPath, bwasFile, pathToLegendBar, outputPath, style = "smoothwm")
+{
+    ll = NULL
+    for (moda in c("thickness", "area")) {
+        ll = c(ll, paste0(inputPath, "/BWAS_", bwasFile, "_",
+            "lh", "_", moda, "_", style, "_outside.png"))
+        ll = c(ll, paste0(inputPath, "/BWAS_", bwasFile, "_",
+            "lh", "_", moda, "_", style, "_inside.png"))
+        ll = c(ll, paste0(inputPath, "/BWAS_", bwasFile, "_",
+            "rh", "_", moda, "_", style, "_inside.png"))
+        ll = c(ll, paste0(inputPath, "/BWAS_", bwasFile, "_",
+            "rh", "_", moda, "_", style, "_outside.png"))
+    }
+    for (moda in c("thick")) {
+        ll = c(ll, paste0(inputPath, "/BWAS_", bwasFile, "_",
+            "lh", "_", moda, "_outside.png"))
+        ll = c(ll, paste0(inputPath, "/BWAS_", bwasFile, "_",
+            "lh", "_", moda, "_inside.png"))
+        ll = c(ll, paste0(inputPath, "/BWAS_", bwasFile, "_",
+            "rh", "_", moda, "_inside.png"))
+        ll = c(ll, paste0(inputPath, "/BWAS_", bwasFile, "_",
+            "rh", "_", moda, "_outside.png"))
+    }
+    ll = c(ll, paste0(pathToLegendBar))
+    plots2 <- lapply(ll <- ll, function(x) {
+        if (x != paste0(pathToLegendBar)) {
+            img <- as.raster(readPNG(x)[, 50:1150, ])
+        }
+        else {
+            img <- as.raster(readPNG(x)[, , ])
+        }
+        rasterGrob(img, interpolate = T)
+    })
+    lay <- rbind(c(1, 1, 3, 3, 5, 5, 7, 7, 9, 9, 11, 11,  17), c(2, 2, 4, 4, 6, 6, 8, 8, 10, 10, 12,
+        12, 17))
+    gs = grid.arrange(grobs = plots2, layout_matrix = lay)
+    ggsave(paste0(outputPath, "/Plots_Combined", bwasFile, "_ROI_",style, ".png"),
+        width = 12, height = 3, gs)
+}
+
+
+
+
+
+#' ROI (Region of Interest) plot
+#'
+#' This function reads in a brain association map at the ROI level
+#' It produces snapshots of the associations with ROI-level cortical thickness, cortical surface and subcortical volumes
+#' Then it combines all plots in a summary plot - and adds the legend
+#' Expected ROIs are the FreeSurfer derived measurements, that use the standard naming used in FreeSurfer and ENIGMA
+#' The function needs the variance of the phenotype, in order to convert association betas into correlation coefficients.
+#'
+#'
+#' @param inputPath path (folder) to the ROI level brain association maps
+#' @param bwasFile name of the brain association map
+#' @param variancePheno Variance of the phenotype (used to standardise the effect sizes into correlations)
+#' @param signifThreshold pvalue significance threshold
+#' @param outputPath path where the outputs will be written
+#' @param correlationRange range of the correlation coefficients (for improved colors) - if not specified, it is inferred from the data
+#' @param betaCol column name corresponding to beta or effect size to plot
+#' @param seCol column name corresponding to the SE of effect size
+#' @param pvalCol column name corresponding to the pvalue associated with effect size
+#' @param style style for plotting, Possible options: "orig", "pial", "sphere", "inflated",  "inflated_pre",  "pial_semi_inflated", "white", "smoothwm" (default)
+#' @return Several snapshots of the cortical surfaces and subcortical stuctures and intermediate text files used for plotting. Last file created is the full figure.
+#' @import plyr png qqman Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices mvMonitoring magick
+#' @export
+plotROIs_corticalAndSubcortical=function(inputPath, bwasFile, variancePheno, outputPath, signifThreshold, correlationRange=NULL, betaCol, seCol, pvalCol, style="smoothwm" ){
+
+# Combine atlas files to get coordinates of all vertices
+allv=NULL
+for (hemi in c("lh", "rh")){
+ for (mod in c("thickness", "area")){
+        atlas <- vroom(system.file("extdata/atlas", paste0("Atlas_allCoordinates_corticalVertices",  "_", hemi, "_", mod, ".txt"), package = "brainMapR", mustWork = TRUE), show_col_types = FALSE, progress = FALSE,  col_types = cols())
+        allv=rbind(allv, atlas)
+ }
+}
+
+atlasSC<-  vroom(system.file("extdata/atlas", paste0("Atlas_coordinates_ROI_subortical.txt"), package = "brainMapR",  mustWork = TRUE), show_col_types = FALSE, progress = FALSE,  col_types = cols())
+atlasSC$hemi="rh"
+atlasSC$hemi[grep(atlasSC$ROIlabel, pattern = "Left")]="lh"
+colnames(atlasSC)[1]="vertexID"
+allv=rbind.fill(allv, atlasSC)
+
+
+res=read.table(paste0(inputPath,"/", bwasFile), header=T)
+res=res[which(res[,pvalCol]< signifThreshold),]
+
+if (dim(res)[1]>0){
+# Initialise variables for plotting
+    print(paste0("Found " , dim(res)[1], " significant ROIs (pvalue < ", signifThreshold, ") to plot"))
+allv$p=1
+allv$b=0
+allv$se=1
+
+# Get list of signif ROI per modality
+cortROInb=grep(res$V1, pattern = "avg")
+subcROInb=c(grep(res$V1, pattern = "Left"), grep(res$V1, pattern = "Right"))
+
+for (roi in cortROInb){
+ roiName=unlist(strsplit(res$V1[roi], "_"))[2]
+ hemi=ifelse(unlist(strsplit(res$V1[roi], "_"))[1]=="L", "lh", "rh")
+ moda=ifelse(unlist(strsplit(res$V1[roi], "_"))[3]=="surfavg", "area", "thickness")
+# attribute values
+ allv$p[which(allv$ROIlabel==roiName & allv$hemi==hemi & allv$moda==moda)]=res[roi,pvalCol]
+ allv$b[which(allv$ROIlabel==roiName & allv$hemi==hemi & allv$moda==moda)]=res[roi,betaCol]
+allv$se[which(allv$ROIlabel==roiName & allv$hemi==hemi & allv$moda==moda)]=res[roi,seCol]
+}
+
+for (roi in subcROInb){
+ roiName=gsub(res$V1[roi], pattern = "_", replacement = "-")
+ hemi=ifelse(unlist(strsplit(res$V1[roi], "_"))[1]=="Left", "lh", "rh")
+ moda="thick"
+# attribute values
+ allv$p[which(allv$ROIlabel==roiName & allv$hemi==hemi & allv$moda==moda)]=res[roi,pvalCol]
+ allv$b[which(allv$ROIlabel==roiName & allv$hemi==hemi & allv$moda==moda)]=res[roi,betaCol]
+allv$se[which(allv$ROIlabel==roiName & allv$hemi==hemi & allv$moda==moda)]=res[roi,seCol]
+}
+}
+colnames(allv)[1]="Probe"
+write.table(allv[,c("Probe", "b", "se", "p")], paste0(outputPath,"/BWAS_ROI_",  bwasFile, "_oscaFormat.linear"), col.names = T, row.names = F, quote=F)
+
+if (is.null(correlationRange)){
+    print("No correlation range provided - we can chose it based on the data")
+corRange=ceiling(max(abs(getCorrelationRange(inputPath = outputPath, bwasFile = paste0("BWAS_ROI_",  bwasFile, "_oscaFormat.linear"), variancePheno = variancePheno, signifThreshold = signifThreshold)))*10)/10
+correlationRange=c(-corRange,corRange)
+}
+
+plotCortical(inputPath = outputPath, bwasFile = paste0("BWAS_ROI_",  bwasFile, "_oscaFormat.linear") , variancePheno = variancePheno, signifThreshold = signifThreshold, outputPath = outputPath, correlationRange = correlationRange, style = style)
+
+plotSubcortical_flat(inputPath = outputPath, bwasFile = paste0("BWAS_ROI_",  bwasFile, "_oscaFormat.linear") , variancePheno = variancePheno, signifThreshold = signifThreshold, outputPath = outputPath, correlationRange = correlationRange)
+
+createLegendBar(outputPath = outputPath, correlationRange = correlationRange, statisticsName = "Cohen's d")
+
+combineCorticalSubcorticalPlots_ROI(inputPath = outputPath, bwasFile  = paste0("BWAS_ROI_",  bwasFile, "_oscaFormat.linear") , pathToLegendBar = paste0(outputPath, "legendbar", correlationRange[1], "_", correlationRange[2], ".png"), outputPath = outputPath, style = style)
+
+}
+
+
