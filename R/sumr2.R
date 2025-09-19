@@ -1,4 +1,113 @@
 
+#' Heteroscedasticity and overcounting weights
+#' @param pred
+#' @param w_ld
+#' @return
+#' @import
+#' @export
+WEIGHTS <- function(pred, w_ld) {
+  1 / (pred^2 * w_ld)
+}
+
+#' Cross-product
+#' @param x
+#' @param y
+#' @return
+#' @import
+#' @export
+crossprod2 <- function(x, y) drop(base::crossprod(x, y))
+
+#' Equivalent to stats::lm.wfit(cbind(1, x), y, w)
+#' @param x
+#' @param y
+#' @param w
+#' @return
+#' @import
+#' @export
+wlm <- function(x, y, w) {
+  wx <- w * x
+  W   <- sum(w)
+  WX  <- sum(wx)
+  WY  <- crossprod2(w,  y)
+  WXX <- crossprod2(wx, x)
+  WXY <- crossprod2(wx, y)
+  alpha <- (WXX * WY - WX * WXY) / (W * WXX - WX^2)
+  beta  <- (WXY * W  - WX * WY)  / (W * WXX - WX^2)
+  list(intercept = alpha, slope = beta, pred = x * beta + alpha)
+}
+
+#' Equivalent to stats::lm.wfit(as.matrix(x), y, w)
+#' @param x
+#' @param y
+#' @param w
+#' @return
+#' @import
+#' @export
+wlm_no_int <- function(x, y, w) {
+  wx <- w * x
+  WXX <- crossprod2(wx, x)
+  WXY <- crossprod2(wx, y)
+  beta  <- WXY / WXX
+  list(slope = beta, pred = x * beta)
+}
+
+
+#' Extract weights from weighted least square during sumR2 regression
+#' @param ld_score
+#' @param ld_size
+#' @param chi2
+#' @param sample_size
+#' @param blocks
+#' @param intercept
+#' @param chi2_thr1
+#' @param chi2_thr2
+#' @return
+#' @import
+#' @export
+getWeights<-function(ld_score, ld_size, chi2, sample_size, blocks = 200,  intercept = NULL, chi2_thr1 = 30, chi2_thr2 = Inf){
+  chi2 <- chi2 + 1e-08  # Avoid division by zero
+  M <- length(chi2)
+sample_size <- rep(sample_size, M)
+  # Store weights for SNPs
+snp_weights <- rep(NA, M)
+step1_int <- if (is.null(intercept)) {
+  ind_sub1 <- which(chi2 < chi2_thr1)
+  w_ld <- pmax(ld_score[ind_sub1], 1)
+  x1 <- (ld_score / ld_size * sample_size)[ind_sub1]
+  y1 <- chi2[ind_sub1]
+
+  pred0 <- y1
+  for (i in 1:100) {
+    pred <- wlm(x1, y1, w = WEIGHTS(pred0, w_ld))$pred
+    if (max(abs(pred - pred0)) < 1e-06) break
+    pred0 <- pred
+  }
+  wlm(x1, y1, w = WEIGHTS(pred0, w_ld))$intercept
+}
+  ind_sub2 <- which(chi2 < chi2_thr2)
+  w_ld <- pmax(ld_score[ind_sub2], 1)
+  x <- (ld_score / ld_size * sample_size)[ind_sub2]
+  y <- chi2[ind_sub2]
+  yp <- y - step1_int
+
+  pred0 <- y
+  for (i in 1:100) {
+      pred <- step1_int + wlm_no_int(x, yp, w = WEIGHTS(pred0, w_ld))$pred
+      if (max(abs(pred - pred0)) < 1e-06) break
+      pred0 <- pred
+  }
+step2_h2 <- wlm_no_int(x, yp, w = WEIGHTS(pred0, w_ld))$slope
+# Store final SNP weights
+snp_weights[ind_sub2] <- WEIGHTS(pred0, w_ld)
+return(snp_weights)
+}
+
+
+
+
+
+
+
 #' SumR2 regression - estimate morphometricity
 #'
 #' This function reads a brain association map
@@ -13,13 +122,15 @@
 #' @param bwasSampleSize Optional : If character, the name of the columns in bwas file that contains the sample size (default "NMISS"). If numeric, the sample size.
 #' @param outputPath path where the outputs will be written
 #' @param varConstrained (TRUE/FALSE, default = T) whether variance components estimates should be constrained to be between 0 and 1
+#' @param plotSumR2 Should plot of SumR2 regression be created (default =T)
+#' @param n_quantiles Number of quantiles (points) to use in SumR2 regression plot (default =20)
 #' @return Morphometricity, SE, confidence intervals and pvalue, SumR2 intercept and SE.
-#' @import GFA vroom plyr
+#' @import GFA vroom plyr ggplot2
 #' @export
-sumR2_regression_univariate=function(inputPath , bwasFile, refPanel, nblock=200, chi2Threshold=80, bwasSampleSize="NMISS", outputPath, varConstrained=TRUE ){
+sumR2_regression_univariate=function(inputPath , bwasFile, refPanel, nblock=200, chi2Threshold=80, bwasSampleSize="NMISS", outputPath, varConstrained=TRUE, plotSumR2=TRUE, n_quantiles=20 ){
 
 # Open summary statistics
-    BWASsignif=NULL
+BWASsignif=NULL
 BWASsumstatfilePath = paste0(inputPath ,  bwasFile)
 BWASsumstatfile<-  vroom(BWASsumstatfilePath, show_col_types = F)
 # Loop on modality and hemispheres to annotate summary statistics and plot sections of Manhattan plot
@@ -38,36 +149,47 @@ BWASsumstat$CHI2=(BWASsumstat$b/BWASsumstat$se)**2
 BWASsignif=plyr::rbind.fill(BWASsignif, BWASsumstat)
   } }
 
-
 # Get rid of vertices not included in the analysis
 if(length(which(is.na(BWASsignif$p)))>0){
-BWASsignif<-BWASsignif[-which(is.na(BWASsignif$p)),]
-}
+BWASsignif<-BWASsignif[-which(is.na(BWASsignif$p)),]  }
 
 # Get sample size in right format
 if (is.character(bwasSampleSize)){
 if (is.null(BWASsignif[1,bwasSampleSize])){
     print(paste0("Sample size (column ", bwasSampleSize, ") not present in the summary statistics, please provide a number of the name of the column"))
-} else {
-    ssize=BWASsignif[1,bwasSampleSize]
-} }
+} else { ssize=BWASsignif[1,bwasSampleSize] } }
 if (is.numeric(bwasSampleSize)){
-    ssize=bwasSampleSize
-}
+    ssize=bwasSampleSize }
 
 # SumR2 regression
 ldresOutAll=NULL
 for (panel in refPanel){
 
-    # Remove vertices with no SumR2 (missing from calculations due to missingness or lack of variability in data)
+# Remove vertices with no SumR2 (missing from calculations due to missingness or lack of variability in data)
 if(length(which(is.na(BWASsignif[,paste0("SumR2_", panel)])))>0){
 BWASsignif2<-BWASsignif[-which(is.na(BWASsignif[,paste0("SumR2_", panel)])),]
 }
 
-    print(paste0("Estimating morphometricity using SumR2 regression. Using ", dim(BWASsignif2)[1], " vertices and SumR2 from reference panel: ", panel ))
+# Run sumr2 regression
+print(paste0("Estimating morphometricity using SumR2 regression. Using ", dim(BWASsignif2)[1], " vertices and SumR2 from reference panel: ", panel ))
+ldres<-GFA::snp_ldsc(ld_score = BWASsignif2[,paste0("SumR2_", panel)], ld_size = dim(BWASsignif2)[1], chi2 = BWASsignif2$CHI2, sample_size = ssize ,chi2_thr1 = chi2Threshold, blocks = nblock )
 
-ldres<-GFA::snp_ldsc(ld_score = BWASsignif2[,paste0("SumR2_", panel)], ld_size = dim(BWASsignif2)[1], chi2 = BWASsignif2$CHI2, sample_size = ssize ,chi2_thr1 = 80, blocks = nblock )
+# Make plot
+if (plotSumR2==TRUE){
+print("Make SumR2 regression plot")
+BWASsignif2$weights<-getWeights(ld_score = BWASsignif2[,paste0("SumR2_", panel)], ld_size = dim(BWASsignif2)[1], chi2 = BWASsignif2$CHI2, sample_size = ssize ,chi2_thr1 = 80, blocks = nblock )
+BWASsignif2$quantile<-cut(BWASsignif2[,paste0("SumR2_", panel)], breaks = quantile(BWASsignif2[,paste0("SumR2_", panel)], probs = seq(0, 1, length.out = n_quantiles + 1)), include.lowest = TRUE)
+BWASsignif2$SumR2=BWASsignif2[,paste0("SumR2_", panel)]
+summary_data <- aggregate(cbind(SumR2, CHI2, weights) ~ quantile, data = BWASsignif2, FUN = mean)
+summary_data$group_w<-cut(summary_data$weights,breaks=quantile(summary_data$weights, probs = seq(0, 1, length.out = 6), na.rm = TRUE), include.lowest = TRUE)
+quantile_means <- tapply(summary_data$weights, summary_data$group_w, mean, na.rm = TRUE)
+summary_data$RegressionWeight<-factor(summary_data$group_w,labels=round(quantile_means,6))
+voxTot=dim(BWASsignif2)[1]
+   p<-ggplot(summary_data,aes(x=SumR2,y=CHI2,color=RegressionWeight))+geom_point(size=2)+scale_color_manual(values=c('#990000','#CC0000','#CC0066','#993399','#6600CC')) +xlab('Mean of sumR2 (by quantile)')+ylab('Mean of chi2 (by quantile)')+geom_abline(slope=ldres[3]*ssize/voxTot,intercept=ldres[1],colour = "darkgrey")+theme(axis.text.x =element_text(face="bold",size=22),axis.text.y =element_text(face="bold",size=22),axis.title=element_text(face="bold",size=22),legend.title = element_text(face="bold",size=22),legend.text = element_text(face="bold",size=16))
+ ggsave(plot=p,filename = paste0(outputPath, bwasFile, "_sumR2Plot_sumR2Ref", panel, ".png"),width = 11,height = 10)
+}
 
+# Constrain variance estimates when larger than 1 or lower than 0
 if (varConstrained==T){
    if (ldres[3]>1){
        ldres[3]=1
@@ -77,10 +199,10 @@ if (varConstrained==T){
       print("Variance constrained to 0") }
 }
 
+# format results
 pv= 2*pnorm(-abs(ldres[3]/ldres[4]))
 cil=ldres[3]-1.96*ldres[4]
 ciu=ldres[3]+1.96*ldres[4]
-
 ldresOut=t(as.data.frame(c(panel,ldres, pv, cil, ciu  )))
 colnames(ldresOut)=c("sumR2RefPanel","int" , "int_se", "m2", "m2_se",  "pvalue",   "m2_CI_lb", "m2_CI_ub"   )
 rownames(ldresOut)=NULL
@@ -89,8 +211,8 @@ ldresOutAll=rbind(ldresOutAll, ldresOut)
 
 write.table(ldresOutAll, paste0(outputPath, "/SumR2_regression_univariate_" , bwasFile, ".rsq"), col.names = T, row.names = F)
 return(ldresOutAll)
-
 }
+
 
 
 
