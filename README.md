@@ -17,7 +17,18 @@ All surface styles from FreeSurfer are available, and handy one-line gif functio
 ![Alt Text](https://github.com/baptisteCD/brainMapR/blob/main/BWAS_BWAS_Age_MRI.linear_lh_thickness_AllStylesPial_leftview.gif)
 
 
---> See code example and usage [**here**](https://baptistecd.github.io/Brain-Mapping-LMM/RR_9_Extractresults_RealPhenotypes.html).
+ROI plots are also possible
+
+![Alt Text](Plots_CombinedBWAS_ROI_Meta_M2_ROIbasedAD_vs._HC_ST_Independent.txt_oscaFormat.linear_ROI_smoothwm.png)
+
+--> See code example and usage [**Tutorial and examples here**](https://baptistecd.github.io/Brain-Mapping-LMM/RR_9_Extractresults_RealPhenotypes.html).
+
+--> Version updates
+
+2025: Version brainMapR_1.0.0.9000 - now includes SumR2 regression for the brain surface, and ROI plots
+
+2023: Version brainMapR_0.8.0.9000 - first release
+
 
 <br><br>
 Overview
@@ -27,11 +38,14 @@ brainMapR is a package to analyse and plot brain association maps (BWAS results)
 
 For more details about the processing and the analyses - see my two previous repositories [brain-LMM](https://baptistecd.github.io/Brain-LMM/) and [brain-mapping-LMM](https://baptistecd.github.io/Brain-Mapping-LMM/).
  
-This package accompanies two publications:   
+This package accompanies the publications:   
 [A unified framework for association and prediction from vertex-wise grey-matter structure](https://onlinelibrary.wiley.com/doi/full/10.1002/hbm.25109)
 
 [Parsimonious model for mass-univariate vertexwise analysis](https://doi.org/10.1117/1.JMI.9.5.052404)
+
+[Grey-Matter Structure Markers of Alzheimer's Disease, Alzheimer's Conversion, Functioning and Cognition: A Meta-Analysis Across 11 Cohorts]( https://doi.org/10.1002/hbm.70089)
  
+
 <br><br>
 Getting started   
 -------- 
