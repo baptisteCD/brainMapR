@@ -19,11 +19,13 @@ All surface styles from FreeSurfer are available, and handy one-line gif functio
 
 ROI plots are also possible
 
-![Alt Text](Plots_CombinedBWAS_ROI_Meta_M2_ROIbasedAD_vs._HC_ST_Independent.txt_oscaFormat.linear_ROI_smoothwm.png)
+![Alt Text](https://github.com/baptisteCD/brainMapR/blob/main/ROIbasedAD_vs._HC_ST_Independent_ROI_smoothwm)
 
 --> See code example and usage [**Tutorial and examples here**](https://baptistecd.github.io/Brain-Mapping-LMM/RR_9_Extractresults_RealPhenotypes.html).
 
 --> Version updates
+
+2025: Version brainMapR_1.1.0.9000 - adding SumR2 regression plots
 
 2025: Version brainMapR_1.0.0.9000 - now includes SumR2 regression for the brain surface, and ROI plots
 

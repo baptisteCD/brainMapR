@@ -1,28 +1,22 @@
 
 #' Heteroscedasticity and overcounting weights
-#' @param pred
-#' @param w_ld
-#' @return
-#' @import
+#' @param pred pred
+#' @param w_ld w_ld
 #' @export
 WEIGHTS <- function(pred, w_ld) {
   1 / (pred^2 * w_ld)
 }
 
 #' Cross-product
-#' @param x
-#' @param y
-#' @return
-#' @import
+#' @param x x
+#' @param y y
 #' @export
 crossprod2 <- function(x, y) drop(base::crossprod(x, y))
 
 #' Equivalent to stats::lm.wfit(cbind(1, x), y, w)
-#' @param x
-#' @param y
-#' @param w
-#' @return
-#' @import
+#' @param x x
+#' @param y y
+#' @param w w
 #' @export
 wlm <- function(x, y, w) {
   wx <- w * x
@@ -37,11 +31,9 @@ wlm <- function(x, y, w) {
 }
 
 #' Equivalent to stats::lm.wfit(as.matrix(x), y, w)
-#' @param x
-#' @param y
-#' @param w
-#' @return
-#' @import
+#' @param x x
+#' @param y y
+#' @param w w
 #' @export
 wlm_no_int <- function(x, y, w) {
   wx <- w * x
@@ -53,16 +45,15 @@ wlm_no_int <- function(x, y, w) {
 
 
 #' Extract weights from weighted least square during sumR2 regression
-#' @param ld_score
-#' @param ld_size
-#' @param chi2
-#' @param sample_size
-#' @param blocks
-#' @param intercept
-#' @param chi2_thr1
-#' @param chi2_thr2
-#' @return
-#' @import
+#' @param ld_score ld_score
+#' @param ld_size ld_size
+#' @param chi2 chi2
+#' @param sample_size sample_size
+#' @param blocks blocks
+#' @param intercept intercept
+#' @param chi2_thr1 chi2_thr1
+#' @param chi2_thr2 chi2_thr2
+#' @return weights from SumR2 regression
 #' @export
 getWeights<-function(ld_score, ld_size, chi2, sample_size, blocks = 200,  intercept = NULL, chi2_thr1 = 30, chi2_thr2 = Inf){
   chi2 <- chi2 + 1e-08  # Avoid division by zero

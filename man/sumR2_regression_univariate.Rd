@@ -12,7 +12,9 @@ sumR2_regression_univariate(
   chi2Threshold = 80,
   bwasSampleSize = "NMISS",
   outputPath,
-  varConstrained = TRUE
+  varConstrained = TRUE,
+  plotSumR2 = TRUE,
+  n_quantiles = 20
 )
 }
 \arguments{
@@ -31,6 +33,10 @@ sumR2_regression_univariate(
 \item{outputPath}{path where the outputs will be written}
 
 \item{varConstrained}{(TRUE/FALSE, default = T) whether variance components estimates should be constrained to be between 0 and 1}
+
+\item{plotSumR2}{Should plot of SumR2 regression be created (default =T)}
+
+\item{n_quantiles}{Number of quantiles (points) to use in SumR2 regression plot (default =20)}
 }
 \value{
 Morphometricity, SE, confidence intervals and pvalue, SumR2 intercept and SE.
