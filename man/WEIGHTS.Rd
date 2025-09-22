@@ -6,6 +6,11 @@
 \usage{
 WEIGHTS(pred, w_ld)
 }
+\arguments{
+\item{pred}{pred}
+
+\item{w_ld}{w_ld}
+}
 \description{
 Heteroscedasticity and overcounting weights
 }

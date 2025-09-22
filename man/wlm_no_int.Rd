@@ -6,6 +6,13 @@
 \usage{
 wlm_no_int(x, y, w)
 }
+\arguments{
+\item{x}{x}
+
+\item{y}{y}
+
+\item{w}{w}
+}
 \description{
 Equivalent to stats::lm.wfit(as.matrix(x), y, w)
 }

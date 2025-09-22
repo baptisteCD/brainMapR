@@ -15,6 +15,26 @@ getWeights(
   chi2_thr2 = Inf
 )
 }
+\arguments{
+\item{ld_score}{ld_score}
+
+\item{ld_size}{ld_size}
+
+\item{chi2}{chi2}
+
+\item{sample_size}{sample_size}
+
+\item{blocks}{blocks}
+
+\item{intercept}{intercept}
+
+\item{chi2_thr1}{chi2_thr1}
+
+\item{chi2_thr2}{chi2_thr2}
+}
+\value{
+weights from SumR2 regression
+}
 \description{
 Extract weights from weighted least square during sumR2 regression
 }

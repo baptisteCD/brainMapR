@@ -6,6 +6,11 @@
 \usage{
 crossprod2(x, y)
 }
+\arguments{
+\item{x}{x}
+
+\item{y}{y}
+}
 \description{
 Cross-product
 }
