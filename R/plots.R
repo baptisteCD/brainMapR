@@ -1110,9 +1110,15 @@ combineCorticalSubcorticalPlots_ROI=function (inputPath, bwasFile, pathToLegendB
     })
     lay <- rbind(c(1, 1, 3, 3, 5, 5, 7, 7, 9, 9, 11, 11,  17), c(2, 2, 4, 4, 6, 6, 8, 8, 10, 10, 12,
         12, 17))
-    gs = grid.arrange(grobs = plots2, layout_matrix = lay)
-    ggsave(paste0(outputPath, "/Plots_Combined", bwasFile, "_ROI_",style, ".png"),
-        width = 12, height = 3, gs)
+       gs = grid.arrange(grobs = plots2, layout_matrix = lay, bg="white")
+
+    g2 <- cowplot::ggdraw(gs) +
+  # same plot.background should be in the theme of p1 and p2 as mentioned above
+  theme(plot.background = element_rect(fill="white", color = NA))
+
+    ggsave(paste0(outputPath, "/Plots_Combined", bwasFile, "_ROI_",
+        style, ".png"), width = 18, height = 4, g2)
+
 }
 
 
