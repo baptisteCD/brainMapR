@@ -29,4 +29,5 @@ Depends:
     mvMonitoring,
     magick,
     GFA,
-    foreach
+    foreach,
+    cowplot

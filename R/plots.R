@@ -416,7 +416,7 @@ dev.off()
 #' @param outputPath folder where the outputs will be written
 #' @param style style for plotting (based on the different cortical fsaverage surface). Possible options: "orig", "pial", "sphere", "inflated",  "inflated_pre",  "pial_semi_inflated",  "smoothwm" (default)
 #' @return A combined plot with cortical and subcortical surface plots and legendbar
-#' @import plyr png qqman Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices
+#' @import plyr png qqman Rvcg rgl RColorBrewer grid gridExtra viridis Morpho ggplot2 utils stats graphics grDevices cowplot
 #' @export
 combineCorticalSubcorticalPlots=function(inputPath, bwasFile, pathToLegendBar, outputPath, style="smoothwm"){
 
@@ -451,9 +451,14 @@ plots2 <- lapply(ll<-ll,function(x){
 lay <- rbind(c(1,1,3,3,5,5,7,7,9,9,11,11,13,13,15,15,17),
             c(2,2,4,4,6,6,8,8,10,10,12,12,14,14,16,16, 17))
 
-gs=grid.arrange(grobs = plots2, layout_matrix = lay)
-ggsave(paste0(outputPath, "/Plots_Combined", bwasFile, "_", style, ".png"),width=18, height=4, gs)
+    gs = grid.arrange(grobs = plots2, layout_matrix = lay, bg="white")
 
+    g2 <- cowplot::ggdraw(gs) +
+  # same plot.background should be in the theme of p1 and p2 as mentioned above
+  theme(plot.background = element_rect(fill="white", color = NA))
+
+    ggsave(paste0(outputPath, "/Plots_Combined", bwasFile, "_",
+        style, ".png"), width = 18, height = 4, g2)
 }
 
 #' Subcortical GIF
