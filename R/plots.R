@@ -1055,8 +1055,11 @@ plots2 <- lapply(ll<-ll,function(x){
 lay <- rbind(c(1,1,3,3,5,5,7,7,9),
             c(2,2,4,4,6,6,8,8,9))
 
-gs=grid.arrange(grobs = plots2, layout_matrix = lay)
-ggsave(paste0(outputPath, "/Plots_SubcorticalCombined", bwasFile, ".png"),width=10, height=4, gs)
+gs = grid.arrange(grobs = plots2, layout_matrix = lay, bg = "white")
+    g2 <- cowplot::ggdraw(gs) + theme(plot.background = element_rect(fill = "white",
+        color = NA))
+
+ggsave(paste0(outputPath, "/Plots_SubcorticalCombined", bwasFile, ".png"),width=10, height=4, g2)
 
 }
 
