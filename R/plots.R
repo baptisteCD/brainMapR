@@ -1059,7 +1059,7 @@ gs = grid.arrange(grobs = plots2, layout_matrix = lay, bg = "white")
     g2 <- cowplot::ggdraw(gs) + theme(plot.background = element_rect(fill = "white",
         color = NA))
 
-ggsave(paste0(outputPath, "/Plots_SubcorticalCombined", bwasFile, ".png"),width=10, height=4, g2)
+ggsave(paste0(outputPath, "/Plots_SubcorticalCombined", bwasFile, ".png"),width=9.5, height=4, g2)
 
 }
 
