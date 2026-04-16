@@ -228,14 +228,14 @@ bwasPlot$radius=ifelse(  bwasPlot$signifVoxel==1, radius ,0.8 )
 par3d(windowRect = c(0, 0, 800, 800)*1.5, zoom=0.8)
 spheres3d(as.matrix(bwasPlot[,c( "Z",  "X", "Y")]), col=bwasPlot$color, radius = bwasPlot$radius)
 rgl.snapshot(paste0(outputPath, "/BWAS_", bwasFile, "_", hemi, "_", moda , "_inside_bundled.png"))
-rgl.close()
+close3d()
 
 bwasPlot$X=bwasPlot$X*(-1)
 bwasPlot$Z=bwasPlot$Z*(-1)
 par3d(windowRect = c(0, 0, 800, 800)*1.5, zoom=0.8)
 spheres3d(as.matrix(bwasPlot[,c( "Z",  "X", "Y")]), col=bwasPlot$color, radius = bwasPlot$radius)
 rgl.snapshot(paste0(outputPath, "/BWAS_", bwasFile,"_", hemi, "_", moda , "_outside_bundled.png"))
-rgl.close()
+close3d()
 
 }}
 }
@@ -288,12 +288,12 @@ bwasPlot=addFlatCoordinatesSubcortical(annotBwas = bwasPlot, hemi = hemi)
 par3d(windowRect = c(0, 0, 800, 800)*1.5, zoom=0.8)
 spheres3d(as.matrix(bwasPlot[,c( "Zf",  "Xf", "Yf")]), col=bwasPlot$color, radius = bwasPlot$radius)
 rgl.snapshot(paste0(outputPath, "/BWAS_", bwasFile, "_", hemi, "_", moda , "_inside.png"))
-rgl.close()
+close3d()
 
 par3d(windowRect = c(0, 0, 800, 800)*1.5, zoom=0.8)
 spheres3d(as.matrix(bwasPlot[,c( "Zf2",  "Xf2", "Yf2")]), col=bwasPlot$color, radius = bwasPlot$radius)
 rgl.snapshot(paste0(outputPath, "/BWAS_", bwasFile,"_", hemi, "_", moda , "_outside.png"))
-rgl.close()
+close3d()
 
 }}
 }
@@ -344,14 +344,14 @@ bwasPlot$radius=ifelse(bwasPlot$signifVoxel==1, radius, 0.8)
 par3d(windowRect = c(0, 0, 800, 800)*1.5, zoom=0.8)
 spheres3d(as.matrix(bwasPlot[, paste(c("Y","X", "Z"), style, sep = "_")]), col=bwasPlot$color, radius = bwasPlot$radius)
 rgl.snapshot(paste0(outputPath, "/BWAS_", bwasFile,"_", hemi, "_", moda ,"_",style, "_inside.png"))
-rgl.close()
+close3d()
 
 bwasPlot[, paste(c("X"), style, sep = "_")]=bwasPlot[, paste(c("X"), style, sep = "_")]*(-1)
 bwasPlot[, paste(c("Y"), style, sep = "_")]=bwasPlot[, paste(c("Y"), style, sep = "_")]*(-1)
 par3d(windowRect = c(0, 0, 800, 800)*1.5, zoom=0.8)
 spheres3d(as.matrix(bwasPlot[, paste(c("Y","X", "Z"), style, sep = "_")]), col=bwasPlot$color, radius = bwasPlot$radius)
 rgl.snapshot(paste0(outputPath, "/BWAS_", bwasFile,"_", hemi, "_", moda ,"_",style,  "_outside.png"))
-rgl.close()
+close3d()
 
 }}
 }
@@ -507,7 +507,7 @@ bwasPlot$radius=ifelse( bwasPlot$signifVoxel==1, 1.5 ,0.8 )
 par3d(windowRect = c(0, 0, 800, 800)*1.5, zoom=0.8)
 spheres3d(as.matrix(bwasPlot[,c( "Z",  "X", "Y")]), col=bwasPlot$color, radius = bwasPlot$radius)
 movie3d( spin3d(rpm=10), duration = 6, fps = nbImagesForGif/6 , frames = paste0(outputPath, "/BWAS_", bwasFile,"_", hemi, "_", moda , "_GIF_"), dir = outputPath,  convert=NULL, clean=F, movie = paste0(outputPath, "/BWAS_", bwasFile,"_", hemi, "_", moda , "_GIF") )
-rgl.close()
+close3d()
 
 }
 
@@ -667,7 +667,7 @@ bwasPlot$Yplot=plotMax[,3]
 par3d(windowRect = c(0, 0, 800, 800)*1.5, zoom=0.8)
 spheres3d(as.matrix(bwasPlot[,c( "Zplot",  "Xplot", "Yplot")]), col=bwasPlot$color, radius = bwasPlot$radius)
 rgl.snapshot(paste0(outputPath, "/BWAS_", bwasFile, "_", hemi, "_", moda , "_ToFlatGIF_", leftOrRightView, "_view_",  sprintf(fmt = "%03d", iii), ".png"))
-rgl.close()
+close3d()
 }
 
 } else if (leftOrRightView=="right"){
@@ -688,7 +688,7 @@ bwasPlot$Yplot=plotMax[,3]
 par3d(windowRect = c(0, 0, 800, 800)*1.5, zoom=0.8)
 spheres3d(as.matrix(bwasPlot[,c( "Zplot",  "Xplot", "Yplot")]), col=bwasPlot$color, radius = bwasPlot$radius)
 rgl.snapshot(paste0(outputPath, "/BWAS_", bwasFile, "_", hemi, "_", moda , "_ToFlatGIF_", leftOrRightView, "_view_",  sprintf(fmt = "%03d", iii), ".png"))
-rgl.close()
+close3d()
 
 }
 }
@@ -768,7 +768,7 @@ for (iii in 0:nbImagesForGif){
 par3d(windowRect = c(0, 0, 800, 800)*1.5, zoom=0.8)
 spheres3d(as.matrix(bwasPlot[,c( "Zf",  "Xf", "Yf")]), col=bwasPlot$color, radius = bwasPlot$radius)
 rgl.snapshot(paste0(outputPath, "/BWAS_", bwasFile, "_", hemi, "_", moda , "_FlatGIF_", leftOrRightView, "_view_", sprintf(fmt = "%03d", iii), ".png"))
-rgl.close()
+close3d()
 
 # Each structure is rotated
 
@@ -807,7 +807,7 @@ for (iii in 0:nbImagesForGif){
 par3d(windowRect = c(0, 0, 800, 800)*1.5, zoom=0.8)
 spheres3d(as.matrix(bwasPlot[,c( "Zf2",  "Xf2", "Yf2")]), col=bwasPlot$color, radius = bwasPlot$radius)
 rgl.snapshot(paste0(outputPath, "/BWAS_", bwasFile, "_", hemi, "_", moda , "_FlatGIF_", leftOrRightView, "_view_", sprintf(fmt = "%03d", iii), ".png"))
-rgl.close()
+close3d()
 
 # Each structure is rotated
 
@@ -911,7 +911,7 @@ bwasPlot=bwasPlot[exctr,]
 par3d(windowRect = c(0, 0, 800, 800)*1.5, zoom=0.8)
 spheres3d(as.matrix(bwasPlot[, paste(c("Y","X", "Z"), style, sep = "_")]), col=bwasPlot$color, radius = bwasPlot$radius )
 movie3d( spin3d(rpm=10), duration = 6, fps = nbImagesForGif/6 , frames = paste0(outputPath, "/BWAS_", bwasFile,"_", hemi, "_", moda , "_", style,"_GIF_"), dir = outputPath,  convert=NULL, clean=F, movie = paste0(outputPath, "/BWAS_", bwasFile,"_", hemi, "_", moda ,"_", style, "_GIF") )
-rgl.close()
+close3d()
 
 }
 
@@ -992,7 +992,7 @@ bwasPlot$Yplot=plotMax[,3]
 par3d(windowRect = c(0, 0, 800, 800)*1.5, zoom=0.8)
 spheres3d(as.matrix(bwasPlot[,c( "Zplot",  "Xplot", "Yplot")]), col=bwasPlot$color, radius = bwasPlot$radius)
 rgl.snapshot(paste0(outputPath, "/BWAS_", bwasFile, "_", hemi, "_", moda , "_",styleStart, "To", styleEnd, "_", leftOrRightView, "_view_",  sprintf(fmt = "%03d", iii), ".png"))
-rgl.close()
+close3d()
 }
 
 # Create GIF using magick functions
