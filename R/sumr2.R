@@ -260,20 +260,20 @@ BWASsignif<-BWASsignif[-which(is.na(BWASsignif$p_1) | is.na(BWASsignif$p_2) ),]
 
 # Get sample sizes in right format
 if (is.na(suppressWarnings(as.numeric(bwasSampleSize[1])))){
-if (is.null(BWASsignif[1,bwasSampleSize[1]])){
+if (is.null(BWASsignif[1,paste0(bwasSampleSize[1], "_1") ])){
     print(paste0("Sample size (column ", bwasSampleSize[1], ") not present in the summary statistics, please provide a number of the name of the column"))
 } else {
-    ssize1=BWASsignif[1,bwasSampleSize[1]]
+    ssize1=BWASsignif[1,paste0(bwasSampleSize[1], "_1") ]
 } } else {
     ssize1=as.numeric(bwasSampleSize[1])
 }
 
 # Get sample size in right format
 if (is.na(suppressWarnings(as.numeric(bwasSampleSize[2])))){
-if (is.null(BWASsignif[1,bwasSampleSize[2]])){
+if (is.null(BWASsignif[1,paste0(bwasSampleSize[2], "_2")]) ){
     print(paste0("Sample size (column ", bwasSampleSize[1], ") not present in the summary statistics, please provide a number of the name of the column"))
 } else {
-    ssize2=BWASsignif[1,bwasSampleSize[2]]
+    ssize2=BWASsignif[1,paste0(bwasSampleSize[2], "_2")]
 } } else {
     ssize2=as.numeric(bwasSampleSize[2])
 }
@@ -295,19 +295,19 @@ ldres=GFA::ldsc_rg(ld_score = BWASsignif2[,paste0("SumR2_", panel)], ld_size = d
 if (varConstrained==T){
    if (ldres[7]>1){
        ldres[7]=1
-      ldres[11]=ldres[3]/(sqrt(ldres[7])*sqrt(ldres[9]))
+      #ldres[11]=ldres[3]/(sqrt(ldres[7])*sqrt(ldres[9]))
       print("Variance of trait 1 constrained to 1") }
     if (ldres[9]>1){
        ldres[9]=1
-      ldres[11]=ldres[3]/(sqrt(ldres[7])*sqrt(ldres[9]))
+      #ldres[11]=ldres[3]/(sqrt(ldres[7])*sqrt(ldres[9]))
       print("Variance of trait 2 constrained to 1") }
      if (ldres[7]<0){
        ldres[7]=0.00001
-      ldres[11]=ldres[3]/(sqrt(ldres[7])*sqrt(ldres[9]))
+      ldres[11]=NA
       print("Variance of trait 1 constrained to 0") }
     if (ldres[9]<0){
        ldres[9]=0.00001
-      ldres[11]=ldres[3]/(sqrt(ldres[7])*sqrt(ldres[9]))
+      ldres[11]=NA
       print("Variance of trait 2 constrained to 0") }
 }
 
@@ -334,4 +334,5 @@ ldresOutAll=rbind(ldresOutAll, ldresOut)
 write.table(ldresOutAll, paste0(outputPath, "/SumR2_regression_bivariate_" , bwasFile[1], "_", bwasFile[2], ".rsq"), col.names = T, row.names = F)
 return(ldresOutAll)
 }
+
 
