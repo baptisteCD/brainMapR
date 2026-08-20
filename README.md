@@ -21,7 +21,10 @@ ROI plots are also possible
 
 ![Alt Text](https://github.com/baptisteCD/brainMapR/blob/main/ROIbasedAD_vs._HC_ST_Independent_ROI_smoothwm)
 
---> See code example and usage [**Tutorial and examples here**](https://baptistecd.github.io/Brain-Mapping-LMM/RR_9_Extractresults_RealPhenotypes.html).
+--> See code example and usage [**Tutorial and examples for analysing BWAS results, annotating maps, mking plots and GIFs e**](https://baptistecd.github.io/Brain-Mapping-LMM/RR_9_Extractresults_RealPhenotypes.html).
+
+[**Tutorial and examples for SumR2 regression**](https://baptistecd.github.io/Brain-Mapping-LMM/RR_11_SumR2_wiki.html).
+
 
 
 If you use brainMapR to plot and annotate BWAS, please cite the relevant publication(s)
