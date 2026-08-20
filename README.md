@@ -31,7 +31,9 @@ ROI plots are also possible
 
 If you use brainMapR to plot and annotate BWAS, please cite the relevant publication(s)
 [A unified framework for association and prediction from vertex-wise grey-matter structure](https://onlinelibrary.wiley.com/doi/full/10.1002/hbm.25109)
+
 [Parsimonious model for mass-univariate vertexwise analysis](https://doi.org/10.1117/1.JMI.9.5.052404)
+
 [Grey-Matter Structure Markers of Alzheimer's Disease, Alzheimer's Conversion, Functioning and Cognition: A Meta-Analysis Across 11 Cohorts]( https://doi.org/10.1002/hbm.70089)
 
 If you use brainMapR to estimate morphometricity and grey-matter correlation, please cite:
