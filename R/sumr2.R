@@ -246,9 +246,32 @@ BWASsumstat$CHI2=(BWASsumstat$b/BWASsumstat$se)**2
 BWASsignif=plyr::rbind.fill(BWASsignif, BWASsumstat)
   } }
 
-# Add second set of sum-stats
+# Open second set of sum-stats
 BWASsumstatfilePath2 = paste0(inputPath[2] ,  bwasFile[2])
 BWASsumstatfile2<-  vroom(BWASsumstatfilePath2, show_col_types = F)
+BWASsumstatfile2=as.data.frame(BWASsumstatfile2)
+
+# Get sample sizes in right format
+if (is.na(suppressWarnings(as.numeric(bwasSampleSize[1])))){
+if (is.null(BWASsignif[1,paste0(bwasSampleSize[1]) ])){
+    print(paste0("Sample size (column ", bwasSampleSize[1], ") not present in the summary statistics, please provide a number of the name of the column"))
+} else {
+    ssize1=BWASsignif[1,paste0(bwasSampleSize[1]) ]
+} } else {
+    ssize1=as.numeric(bwasSampleSize[1])
+}
+
+# Get sample size in right format
+if (is.na(suppressWarnings(as.numeric(bwasSampleSize[2])))){
+if (is.null(BWASsumstatfile2[1,paste0(bwasSampleSize[2])]) ){
+    print(paste0("Sample size (column ", bwasSampleSize[1], ") not present in the summary statistics, please provide a number of the name of the column"))
+} else {
+    ssize2=BWASsumstatfile2[1,paste0(bwasSampleSize[2])]
+} } else {
+    ssize2=as.numeric(bwasSampleSize[2])
+}
+
+
 BWASsignif=merge(BWASsignif, BWASsumstatfile2, by="Probe", suffixes = c("_1", "_2"))
 BWASsignif$z_1=BWASsignif$b_1/BWASsignif$se_1
 BWASsignif$z_2=BWASsignif$b_2/BWASsignif$se_2
@@ -258,25 +281,6 @@ if (length(which(is.na(BWASsignif$p_1)))>0 | length(which(is.na(BWASsignif$p_2))
 BWASsignif<-BWASsignif[-which(is.na(BWASsignif$p_1) | is.na(BWASsignif$p_2) ),]
 }
 
-# Get sample sizes in right format
-if (is.na(suppressWarnings(as.numeric(bwasSampleSize[1])))){
-if (is.null(BWASsignif[1,paste0(bwasSampleSize[1], "_1") ])){
-    print(paste0("Sample size (column ", bwasSampleSize[1], ") not present in the summary statistics, please provide a number of the name of the column"))
-} else {
-    ssize1=BWASsignif[1,paste0(bwasSampleSize[1], "_1") ]
-} } else {
-    ssize1=as.numeric(bwasSampleSize[1])
-}
-
-# Get sample size in right format
-if (is.na(suppressWarnings(as.numeric(bwasSampleSize[2])))){
-if (is.null(BWASsignif[1,paste0(bwasSampleSize[2], "_2")]) ){
-    print(paste0("Sample size (column ", bwasSampleSize[1], ") not present in the summary statistics, please provide a number of the name of the column"))
-} else {
-    ssize2=BWASsignif[1,paste0(bwasSampleSize[2], "_2")]
-} } else {
-    ssize2=as.numeric(bwasSampleSize[2])
-}
 
 # SumR2 regression - estimate rGM
 ldresOutAll=NULL

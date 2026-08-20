@@ -23,6 +23,15 @@ ROI plots are also possible
 
 --> See code example and usage [**Tutorial and examples here**](https://baptistecd.github.io/Brain-Mapping-LMM/RR_9_Extractresults_RealPhenotypes.html).
 
+
+If you use brainMapR to plot and annotate BWAS, please cite the relevant publication(s)
+[A unified framework for association and prediction from vertex-wise grey-matter structure](https://onlinelibrary.wiley.com/doi/full/10.1002/hbm.25109)
+[Parsimonious model for mass-univariate vertexwise analysis](https://doi.org/10.1117/1.JMI.9.5.052404)
+[Grey-Matter Structure Markers of Alzheimer's Disease, Alzheimer's Conversion, Functioning and Cognition: A Meta-Analysis Across 11 Cohorts]( https://doi.org/10.1002/hbm.70089)
+
+If you use brainMapR to estimate morphometricity and grey-matter correlation, please cite:
+[Fast and Efficient Estimation of Morphometricity and Grey-Matter Correlation from Neuroimaging Summary Statistics](https://hal.science/hal-05356974v1/file/Paper_VF.pdf)
+
 --> Version updates
 
 2025: Version brainMapR_1.1.0.9000 - adding SumR2 regression plots
