@@ -289,7 +289,10 @@ for (panel in refPanel){
 # Remove vertices with no SumR2 (missing from calculations due to missingness or lack of variability in data)
 if(length(which(is.na(BWASsignif[,paste0("SumR2_", panel)])))>0){
 BWASsignif2<-BWASsignif[-which(is.na(BWASsignif[,paste0("SumR2_", panel)])),]
+} else {
+    BWASsignif2<-BWASsignif
 }
+
 
 print(paste0("Estimating rGM using SumR2 regression. Using ", dim(BWASsignif2)[1], " vertices and SumR2 from reference panel: ", panel ))
 
